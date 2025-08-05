@@ -3,8 +3,8 @@ const dbConfig = {
   USER: 'root',              // Usuario de la base de datos
   PASSWORD: '',              // Contraseña de ese usuario (modifícalo si usas una)
   DB: 'dental_life_node.js + orm', // El nombre exacto de la base de datos en MariaDB
-  DIALECT: 'mysql',        // Dialecto del motor (puede ser mysql, postgres, sqlite, etc.)
-  pool: {
+  DIALECT: 'mysql',  
+  pool: { //conjunto de conecciones para optimizar el rendimiento
     max: 5,          // Máximo número de conexiones en el pool
     min: 0,          // Mínimo número de conexiones
     acquire: 30000,  // Tiempo máximo que Sequelize intentará conectarse (ms)
