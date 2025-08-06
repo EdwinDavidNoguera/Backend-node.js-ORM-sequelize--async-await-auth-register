@@ -1,6 +1,6 @@
 import Usuario from "../models/usuariosModel.js";
 import Paciente from "../models/pacientesModel.js";
-
+import bcrypt from 'bcrypt';
 class PacienteController {
   // ✅ Obtener todos los pacientes con datos de usuario
   async obtenerPacientes(req, res) {
@@ -57,49 +57,60 @@ class PacienteController {
     const t = await Usuario.sequelize.transaction();
 
     try {
-      // 1. Crear usuario
-      const nuevoUsuario = await Usuario.create(
-        {
-          nombre,
-          apellido,
-          email,
-          password,
-          rol,
-          foto_perfil,
-        },
-        { transaction: t }
-      );
+        
+        const hashedPassword = await bcrypt.hash(password, 10);
+        // 1. Crear usuario
+        const nuevoUsuario = await Usuario.create(
+            {
+            nombre,
+            apellido,
+            email,
+            password : hashedPassword,
+            rol,
+            foto_perfil,
+            },
+            { transaction: t }
+        );
 
-      // 2. Crear paciente (usa el mismo id que el usuario por relación 1:1)
-      const nuevoPaciente = await Paciente.create(
-        {
-          id: nuevoUsuario.id,
-          fecha_nacimiento,
-          celular,
-          genero,
-        },
-        { transaction: t }
-      );
+        // 2. Crear paciente (usa el mismo id que el usuario por relación 1:1)
+        const nuevoPaciente = await Paciente.create(
+            {
+            id: nuevoUsuario.id,
+            fecha_nacimiento,
+            celular,
+            genero,
+            },
+            { transaction: t }
+        );
 
-      await t.commit();
+        await t.commit();
 
-      res.status(201).json({
-        message: "Paciente creado exitosamente",
-        usuario: nuevoUsuario,
-        paciente: nuevoPaciente,
-      });
-    } catch (error) {
-      await t.rollback();
-      res.status(500).json({
-        message: "Error al crear paciente",
-        error: error.message,
-      });
+        res.status(201).json({
+            message: "Paciente creado exitosamente",
+            usuario: nuevoUsuario,
+            paciente: nuevoPaciente,
+        });
+        } catch (error) {
+        await t.rollback();
+        res.status(500).json({
+            message: "Error al crear paciente",
+            error: error.message,
+        });
+        }
     }
-  }
 
   // ✅ Actualizar datos de usuario (paciente)
   async actualizarPaciente(req, res) {
+
     const id = req.params.id;
+    const rolUsuario = req.user.rol; // Asumiendo que el token ya se verificó y este valor está disponible
+    const idUsuario = req.user.id;
+
+    if (rolUsuario === 'paciente' && idUsuario !== id) { // el paciento solo puede modificar su propio perfil
+      return res.status(403).json({ mensaje: 'No tienes permiso para modificar otro paciente' });
+    }
+
+    
     const {
       nombre,
       apellido,

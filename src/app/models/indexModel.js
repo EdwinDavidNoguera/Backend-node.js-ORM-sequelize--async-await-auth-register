@@ -24,7 +24,7 @@ async function testConnection() {
     console.log(`Conexión a la base de datos de mySQL establecida correctamente. y corriendo en ${dbConfig.HOST}`);
 
     // 👇 sincronizar los modelos
-    await sequelize.sync({ alter: true }); // o force: true si quieres borrar y recrear las tablas
+    await sequelize.sync(); // o force: true si quieres borrar y recrear las tablas
     console.log("✅ Modelos sincronizados con la base de datos.");
 
   } catch (error) {
