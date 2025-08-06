@@ -1,70 +1,58 @@
-import sequelize  from  './db.js'; // importamos Sequelize
-import dbConfig from '../../config/dbConfig.js'; // Importamos la configuración de la base de datos
+// Importa la instancia de Sequelize desde el archivo db.js (configurada con parámetros de conexión)
+import sequelize from './db.js'; //esto se hizo para evitar problemas de circularidad
 
-// 1. Crear una instancia de Sequelize con los datos de conexión, los cuales estan en dbConfig
+// Importa la configuración de la base de datos (host, usuario, contraseña, etc.)
+import dbConfig from '../../config/dbConfig.js';
 
-// este modelo Este archivo debería encargarse de:
+// Este archivo tiene como propósito:
+// ✅ Inicializar Sequelize
+// ✅ Probar la conexión
+// ✅ Importar modelos
+// ✅ Exportar la instancia de Sequelize y los modelos
 
-// Inicializar la instancia de Sequelize.
-
-// Probar la conexión a la base de datos.
-
-// Importar los modelos ya definidos desde sus propios archivos.
-
-// Exportar la instancia de Sequelize y los modelos importados.
-// src/app/models/index.js
-
-
-// 1. Crear una instancia de Sequelize con los datos de conexión
-
-// test para verificar la conexión a la base de datos
+// Función asincrónica para probar la conexión a la base de datos
 async function testConnection() {
   try {
+    // Intenta autenticar la conexión con la base de datos, solo para verificar que todo esté correcto
     await sequelize.authenticate();
     console.log(`Conexión a la base de datos de mySQL establecida correctamente. y corriendo en ${dbConfig.HOST}`);
 
-    // 👇 sincronizar los modelos
-    await sequelize.sync(); // o force: true si quieres borrar y recrear las tablas
+    // Sincroniza todos los modelos con la base de datos
+    await sequelize.sync(); 
     console.log("✅ Modelos sincronizados con la base de datos.");
 
   } catch (error) {
+    // Captura y muestra cualquier error de conexión
     console.error('No se pudo conectar a la base de datos de mySQL:', error);
   }
 }
 
-// 2. Importar los modelos (estos archivos contendrán la definición de cada modelo)
-//    Importamos con un alias (ej. 'UsuarioModel') para evitar conflictos de nombres
-//    y luego asignamos el modelo final al nombre simple (ej. 'Usuario').
-//    Cada uno de estos archivos *debe* exportar su modelo por defecto.
-import UsuarioModel from './usuariosModel.js';
-import OdontologoModel from './odontologosModel.js';
-import PacienteModel from './pacientesModel.js';
+// Importa los modelos individuales definidos en archivos separados
+import UsuarioModel from './usuariosModel.js';        // Modelo de usuarios
+import OdontologoModel from './odontologosModel.js';  // Modelo de odontólogos
+import PacienteModel from './pacientesModel.js';      // Modelo de pacientes
 
-// Asignamos los modelos importados a variables locales para exportarlos
+// Asignacion de los modelos para exportarlos
 const Usuario = UsuarioModel;
 const Odontologo = OdontologoModel;
 const Paciente = PacienteModel;
 
-// 3. (Opcional pero recomendado para centralizar relaciones)
-//    Definir relaciones entre modelos aquí después de que todos estén importados.
-//    Asegúrate de que tus modelos individuales NO definan relaciones si las centralizas aquí.
-//    Si ya las defines dentro de cada modelo (como tienes Paciente.belongsTo(Usuario)),
-//    entonces no es necesario repetirlas aquí.
-
-// Ejemplo de definición de relaciones aquí si NO están en los archivos de modelo individuales:
+// (Opcional) Aquí podría definir las relaciones entre modelos si no se fefinen en los modelos individuales
+// Ejemplo 
 // Usuario.hasOne(Paciente, { foreignKey: 'id', as: 'paciente' });
 // Paciente.belongsTo(Usuario, { foreignKey: 'id', as: 'usuario' });
-// ... y así para Odontologo, Citas, etc.
+// Similar para Odontologo, Citas, etc.
 
-// 4. Sincronizar modelos con la base de datos (generalmente se hace en src/index.js principal de la app)
-//    NO lo hagas aquí a menos que tengas una razón muy específica.
-//    sequelize.sync({ force: false }).then(() => console.log('Base de datos sincronizada'));
+// ⚠️ La sincronización con la base de datos generalmente debe hacerse desde el archivo src/index.js
+// sequelize.sync({ force: false }).then(() => console.log('Base de datos sincronizada')); sin embargo 
+// se debe tener cuidado con el uso de { force: true } ya que elimina y recrea las tablas y se acomulan llaves 
+// primarias en la DB, lo que puede causar problemas si se usa en producción.
 
-// 5. Exportar sequelize y los modelos
+// Exporta la instancia de sequelize y los modelos para usarlos en otros módulos del proyecto
 export {
-  sequelize,
-  testConnection,
-  Usuario,
-  Odontologo,
-  Paciente
+  sequelize,       // Instancia de conexión Sequelize
+  testConnection,  // Función para probar conexión y sincronización
+  Usuario,         // Modelo Usuario
+  Odontologo,      // Modelo Odontologo
+  Paciente         // Modelo Paciente
 };

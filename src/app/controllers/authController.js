@@ -4,16 +4,20 @@ import jwt from 'jsonwebtoken';
 
 const SECRET = 'mi_clave_secreta'; // En producción pon esto en un archivo .env
 
+//esta funcion asincrona maneja el login de los usuarios
+//recibe el email y la contraseña del usuario, verifica si existe y si la contraseña es correcta
+//si todo es correcto, genera un token y lo devuelve
 const login = async (req, res) => {
   const { email, password } = req.body;
 
-  try {
+  try { 
     const usuario = await Usuario.findOne({ where: { email } });
 
-    if (!usuario) {
+    if (!usuario) { // si no existe el usuario
       return res.status(404).json({ message: "Usuario no encontrado" });
     }
-
+    // Verifica la contraseña
+     // Compara la contraseña ingresada con la almacenada en la base de datos
     const passwordValida = await bcrypt.compare(password, usuario.password);
 
     if (!passwordValida) {
