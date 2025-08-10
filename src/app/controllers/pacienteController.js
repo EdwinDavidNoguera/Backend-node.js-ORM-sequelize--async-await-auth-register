@@ -10,7 +10,24 @@ class PacienteController {
       const pacientes = await Paciente.findAll({
         include: { model: Usuario, as: "usuario" },  // JOIN con usuario
       });
-      res.json(pacientes);
+
+       const pacientesAplanados = pacientes.map(paciente => {
+        return {
+          id: paciente.id,
+            nombre: paciente.usuario?.nombre,            // Tomado desde la relación usuario
+            apellido: paciente.usuario?.apellido,        // Tomado desde la relación usuario
+            email: paciente.usuario?.email,              // Tomado desde la relación usuario
+            rol: paciente.usuario?.rol,                  // Tomado desde la relación usuario
+            foto_perfil: paciente.usuario?.foto_perfil,  // Tomado desde la relación usuario
+            activo: paciente.usuario?.activo,            // Tomado desde la relación usuario
+            fecha_nacimiento: paciente.fecha_nacimiento,
+            celular: paciente.celular,
+            genero: paciente.genero,
+          
+        };
+      });
+      res.json(pacientesAplanados);
+      console.log(pacientesAplanados)
     } catch (error) {
       res.status(500).json({
         message: "Error al obtener pacientes",
@@ -21,7 +38,7 @@ class PacienteController {
 
   // ✅ Obtener un paciente por ID (con datos de usuario)
   async obtenerPacientePorId(req, res) {
-    const id = req.params.id;
+    const id = req.params.id; // ID del paciente a buscar, necesario para validar y enviar errores
     try {
       const paciente = await Paciente.findByPk(id, {
         include: { model: Usuario, as: "usuario" }, // JOIN con tabla usuarios
@@ -56,11 +73,65 @@ class PacienteController {
       genero,
     } = req.body;
 
+    // Objeto para almacenar errores de validación
+    const errores = {};
+
+    // Validaciones de campos obligatorios
+    if (!nombre) errores.nombre = "El nombre es obligatorio";
+    if (!apellido) errores.apellido = "El apellido es obligatorio";
+    if (!email) errores.email = "El correo es obligatorio";
+    if (!password) errores.password = "La contraseña es obligatoria";
+    if (!celular) errores.celular = "El celular es obligatorio";
+    if (!fecha_nacimiento) errores.fecha_nacimiento = "La fecha de nacimiento es obligatoria";
+    if (!genero) errores.genero = "El género es obligatorio";
+
+    // Si hay errores en campos obligatorios, responderlos
+    if (Object.keys(errores).length > 0) {
+      return res.status(400).json({ errores });
+    }
+
+    // Regex para validaciones
+    
+  // Regex para validaciones
+    const regexPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+    const regexCelular = /^[0-9]{10}$/;
+    const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    // Validar email
+    if (!regexEmail.test(email)) {
+      errores.email = "El correo electrónico no es válido";
+    }
+
+    // Validar contraseña (mínimo 8 caracteres, con mayúsculas, minúsculas, números y símbolos)
+    if (!regexPassword.test(password)) {
+      errores.password = "Contraseña insegura. Debe tener mínimo 8 caracteres, incluyendo mayúsculas, minúsculas, números y caracteres especiales.";
+    }
+
+    // Validar celular
+    if (!regexCelular.test(celular)) {
+      errores.celular = "Celular inválido. Debe contener exactamente 10 dígitos entre 0 y 9.";
+    }
+
+    // Si hay errores de validación, responderlos
+    if (Object.keys(errores).length > 0) {
+      return res.status(400).json({ errores });
+    }
+
+
+
     const t = await Usuario.sequelize.transaction(); // Transacción para asegurar integridad
 
     try {
       // 🔐 Hashear la contraseña antes de guardar
       const hashedPassword = await bcrypt.hash(password, 10);
+
+      //Validaciones basicas
+      // Verificar si el email ya existe
+      const usuarioExistente = await Usuario.findOne({ where: { email } });
+      if (usuarioExistente) {
+        return res.status(409).json({ message: "El correo ya está registrado" });
+      }
+      //El celular se puede duplicar
 
       // 1. Crear usuario
       const nuevoUsuario = await Usuario.create(

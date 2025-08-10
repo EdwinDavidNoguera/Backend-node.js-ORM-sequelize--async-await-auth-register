@@ -1,6 +1,7 @@
 import Usuario from "../models/usuariosModel.js";        // Modelo principal de usuarios
 import Paciente from "../models/pacientesModel.js";      // Modelo de pacientes
 import Odontologo from "../models/odontologosModel.js";  // Modelo de odontólogos
+import bcrypt from 'bcrypt';                         // Para hashear contraseñas
 
 class UsuarioController {
 
@@ -31,12 +32,15 @@ class UsuarioController {
         return res.status(400).json({ message: "El correo ya está registrado" });
       }
 
+      // 🔐 Hashear la contraseña antes de guardar
+            const hashedPassword = await bcrypt.hash(password, 10);
+
       // Crear el nuevo usuario
       const nuevoUsuario = await Usuario.create({
         nombre,
         apellido,
         email,
-        password,        // IMPORTANTE: aquí deberías encriptarlo (ver nota más abajo)
+        password: hashedPassword,
         rol,
         foto_perfil
       });

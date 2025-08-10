@@ -1,5 +1,6 @@
 import Usuario from "../models/usuariosModel.js";       // Modelo de usuario
 import Odontologo from "../models/odontologosModel.js"; // Modelo de odontólogo
+import bcrypt from 'bcrypt';                            // Para hashear contraseñas
 
 class OdontologoController {
 
@@ -57,11 +58,13 @@ class OdontologoController {
 
     // Se crea una transacción para asegurar integridad
     const t = await Usuario.sequelize.transaction();
+    
 
     try {
-      // Primero se crea el usuario
+      // Primero se crea el usuario con la contraseña encriptada
+      const passwordEncriptada = await bcrypt.hash(password, 10);
       const nuevoUsuario = await Usuario.create(
-        { nombre, apellido, email, password, rol, foto_perfil },
+        { nombre, apellido, email, password: passwordEncriptada, rol, foto_perfil },
         { transaction: t }
       );
 

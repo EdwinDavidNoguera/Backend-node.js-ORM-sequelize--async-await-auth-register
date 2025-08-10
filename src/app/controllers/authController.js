@@ -10,19 +10,25 @@ const SECRET = 'mi_clave_secreta'; // En producción pon esto en un archivo .env
 const login = async (req, res) => {
   const { email, password } = req.body;
 
+  console.log("📥 Datos recibidos en login:", { email, password },"ATT: controlador Node.js");
+
+
   try { 
     const usuario = await Usuario.findOne({ where: { email } });
 
-    if (!usuario) { // si no existe el usuario
-      return res.status(404).json({ message: "Usuario no encontrado" });
+    if (!usuario || !usuario.password) { // si no existe el usuario
+      console.log("✖️✖️ Usuario no encontrado o sin password en DB ATT: controlador node.js");
+      return res.status(401).json({ message: "Usuario o contraseña incorrectos" });
     }
     // Verifica la contraseña
      // Compara la contraseña ingresada con la almacenada en la base de datos
     const passwordValida = await bcrypt.compare(password, usuario.password);
 
     if (!passwordValida) {
-      return res.status(401).json({ message: "Contraseña incorrecta" });
+      return res.status(401).json({ message: "Usuario o contraseña incorrectos" });
+      
     }
+
 
     const token = jwt.sign({ id: usuario.id, rol: usuario.rol }, SECRET, {
       expiresIn: '1d',
@@ -31,6 +37,7 @@ const login = async (req, res) => {
     res.json({ message: "Login exitoso", token, id: usuario.id, rol: usuario.rol });
   } catch (error) {
     res.status(500).json({ message: "Error al iniciar sesión", error: error.message });
+    console.log(error);
   }
 };
 
