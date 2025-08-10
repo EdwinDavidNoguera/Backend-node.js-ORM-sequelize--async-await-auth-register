@@ -2,7 +2,7 @@ import Usuario from '../models/usuariosModel.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
-const SECRET = 'mi_clave_secreta'; // En producción pon esto en un archivo .env
+const SECRET = 'mi_clave_secreta'; // En producción se pone en un archivo .env
 
 //esta funcion asincrona maneja el login de los usuarios
 //recibe el email y la contraseña del usuario, verifica si existe y si la contraseña es correcta
