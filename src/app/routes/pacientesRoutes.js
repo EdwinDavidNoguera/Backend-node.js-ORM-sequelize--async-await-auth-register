@@ -6,13 +6,13 @@ import verificarToken from '../middlewares/verificarToken.js';
 
 // Rutas para /api/pacientes/
 router.route('/')
-  .get(verificarToken, verificarRol('admin', 'odontologo',), PacienteController.obtenerPacientes)   // Obtener todos los pacientes
-  .post(PacienteController.crearPaciente);    // Crear un nuevo paciente
+  .get(verificarToken, verificarRol('admin', 'odontologo'), PacienteController.obtenerPacientes)   // Obtener todos los pacientes ...
+  .post(verificarToken, verificarRol('admin', 'odontologo'), PacienteController.crearPaciente);    // Crear un nuevo paciente
 
 // Rutas para /api/pacientes/:id
 router.route('/:id') // Verifica el token y rol antes de acceder
   .get(verificarToken,  verificarRol('admin', 'odontologo'), PacienteController.obtenerPacientePorId)  // Obtener un paciente por ID
   .put(verificarToken,  verificarRol('admin', 'paciente'),PacienteController.actualizarPaciente)    // Actualizar paciente por ID
-  .delete(verificarToken,  verificarRol('admin', 'odontologo'),PacienteController.eliminarPaciente);  // Eliminar paciente por ID
+  .delete(verificarToken,  verificarRol('admin'),PacienteController.eliminarPaciente);  // Eliminar paciente por ID
 
  export default router;

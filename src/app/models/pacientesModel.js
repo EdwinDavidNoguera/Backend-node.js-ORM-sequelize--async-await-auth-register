@@ -36,9 +36,6 @@ Paciente.init(
   }
 );
 
-// Relación uno a uno entre Usuario y Paciente
-Usuario.hasOne(Paciente, { foreignKey: "id", as: "paciente" });
-Paciente.belongsTo(Usuario, { foreignKey: "id", as: "usuario" });
 
 // Exportamos el modelo para usarlo en otras partes del proyecto
 export default Paciente;

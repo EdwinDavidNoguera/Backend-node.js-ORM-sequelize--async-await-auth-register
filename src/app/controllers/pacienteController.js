@@ -1,31 +1,32 @@
-import Usuario from "../models/usuariosModel.js";    // Modelo de usuario
-import Paciente from "../models/pacientesModel.js";  // Modelo de paciente
-import bcrypt from 'bcrypt';                         // Para hashear contraseñas
+import Usuario from "../models/usuariosModel.js";    // Modelo de usuario (datos generales de login y perfil)
+import Paciente from "../models/pacientesModel.js";  // Modelo de paciente (datos específicos del paciente)
+import bcrypt from 'bcrypt';                         // Librería para encriptar contraseñas
 
 class PacienteController {
 
-  // ✅ Obtener todos los pacientes junto a sus datos de usuario
+  // Obtener todos los pacientes con sus datos de usuario asociados
   async obtenerPacientes(req, res) {
     try {
       const pacientes = await Paciente.findAll({
-        include: { model: Usuario, as: "usuario" },  // JOIN con usuario
+        include: { model: Usuario, as: "usuario" },  // JOIN con la tabla usuarios
       });
 
-       const pacientesAplanados = pacientes.map(paciente => {
+      // Se transforman los datos en un objeto más "aplanado" para el frontend, para facilitar su uso
+      const pacientesAplanados = pacientes.map(paciente => {
         return {
           id: paciente.id,
-            nombre: paciente.usuario?.nombre,            // Tomado desde la relación usuario
-            apellido: paciente.usuario?.apellido,        // Tomado desde la relación usuario
-            email: paciente.usuario?.email,              // Tomado desde la relación usuario
-            rol: paciente.usuario?.rol,                  // Tomado desde la relación usuario
-            foto_perfil: paciente.usuario?.foto_perfil,  // Tomado desde la relación usuario
-            activo: paciente.usuario?.activo,            // Tomado desde la relación usuario
-            fecha_nacimiento: paciente.fecha_nacimiento,
-            celular: paciente.celular,
-            genero: paciente.genero,
-          
+          nombre: paciente.usuario?.nombre,            
+          apellido: paciente.usuario?.apellido,        
+          email: paciente.usuario?.email,              
+          rol: paciente.usuario?.rol,                  
+          foto_perfil: paciente.usuario?.foto_perfil,  
+          activo: paciente.usuario?.activo,            
+          fecha_nacimiento: paciente.fecha_nacimiento, 
+          celular: paciente.celular,
+          genero: paciente.genero,
         };
       });
+
       res.json(pacientesAplanados);
       console.log(pacientesAplanados)
     } catch (error) {
@@ -36,12 +37,12 @@ class PacienteController {
     }
   }
 
-  // ✅ Obtener un paciente por ID (con datos de usuario)
+  // Obtener un paciente específico por ID (incluye datos de usuario)
   async obtenerPacientePorId(req, res) {
-    const id = req.params.id; // ID del paciente a buscar, necesario para validar y enviar errores
+    const id = req.params.id; // ID pasado en la URL, en el frontend seria /pacientes/:id
     try {
       const paciente = await Paciente.findByPk(id, {
-        include: { model: Usuario, as: "usuario" }, // JOIN con tabla usuarios
+        include: { model: Usuario, as: "usuario" }, // JOIN con usuarios
       });
 
       if (!paciente) {
@@ -50,7 +51,7 @@ class PacienteController {
         });
       }
 
-      res.json(paciente);
+      res.json(paciente); //respuesta con el paciente encontrado
     } catch (error) {
       res.status(500).json({
         message: "Error al obtener paciente",
@@ -59,21 +60,21 @@ class PacienteController {
     }
   }
 
-  // ✅ Crear un nuevo paciente (crea usuario + paciente)
+  // Crear un nuevo paciente (crea tanto usuario como paciente en una transacción)
   async crearPaciente(req, res) {
     const {
       nombre,
       apellido,
       email,
       password,
-      rol = "paciente", // por defecto es paciente
+      rol = "paciente", // Por defecto el rol es paciente, el cliente no puede asignar otro rol
       foto_perfil,
       fecha_nacimiento,
       celular,
       genero,
     } = req.body;
 
-    // Objeto para almacenar errores de validación
+    // Objeto para recolectar errores de validación
     const errores = {};
 
     // Validaciones de campos obligatorios
@@ -85,55 +86,48 @@ class PacienteController {
     if (!fecha_nacimiento) errores.fecha_nacimiento = "La fecha de nacimiento es obligatoria";
     if (!genero) errores.genero = "El género es obligatorio";
 
-    // Si hay errores en campos obligatorios, responderlos
     if (Object.keys(errores).length > 0) {
       return res.status(400).json({ errores });
     }
 
-    // Regex para validaciones
-    
-  // Regex para validaciones
+    // Regex para validaciones de seguridad
     const regexPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
     const regexCelular = /^[0-9]{10}$/;
     const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    // Validar email
+    // Validación de email
     if (!regexEmail.test(email)) {
       errores.email = "El correo electrónico no es válido";
     }
 
-    // Validar contraseña (mínimo 8 caracteres, con mayúsculas, minúsculas, números y símbolos)
+    // Validación de contraseña fuerte
     if (!regexPassword.test(password)) {
       errores.password = "Contraseña insegura. Debe tener mínimo 8 caracteres, incluyendo mayúsculas, minúsculas, números y caracteres especiales.";
     }
 
-    // Validar celular
+    // Validación de celular
     if (!regexCelular.test(celular)) {
-      errores.celular = "Celular inválido. Debe contener exactamente 10 dígitos entre 0 y 9.";
+      errores.celular = "Celular inválido. Debe contener exactamente 10 dígitos.";
     }
 
-    // Si hay errores de validación, responderlos
     if (Object.keys(errores).length > 0) {
       return res.status(400).json({ errores });
     }
 
-
-
-    const t = await Usuario.sequelize.transaction(); // Transacción para asegurar integridad
+    // Transacción para asegurar que usuario y paciente se creen juntos
+    const t = await Usuario.sequelize.transaction();
 
     try {
-      // 🔐 Hashear la contraseña antes de guardar
+      // Encriptar la contraseña antes de guardar
       const hashedPassword = await bcrypt.hash(password, 10);
 
-      //Validaciones basicas
-      // Verificar si el email ya existe
+      // Verificar si el email ya existe en la base de datos
       const usuarioExistente = await Usuario.findOne({ where: { email } });
       if (usuarioExistente) {
-        return res.status(409).json({ message: "El correo ya está registrado" });
+        return res.status(409).json({ message: "El correo ya está registrado" }); //en la respuesta
       }
-      //El celular se puede duplicar
 
-      // 1. Crear usuario
+      // Crear usuario
       const nuevoUsuario = await Usuario.create(
         {
           nombre,
@@ -146,10 +140,10 @@ class PacienteController {
         { transaction: t }
       );
 
-      // 2. Crear paciente usando el ID del usuario
+      // Crear paciente asociado al usuario
       const nuevoPaciente = await Paciente.create(
         {
-          id: nuevoUsuario.id,
+          id: nuevoUsuario.id, // Se asegura la relación uno a uno
           fecha_nacimiento,
           celular,
           genero,
@@ -165,7 +159,7 @@ class PacienteController {
         paciente: nuevoPaciente,
       });
     } catch (error) {
-      await t.rollback(); // Si algo falla, se revierte todo
+      await t.rollback(); // Revertir en caso de error
       res.status(500).json({
         message: "Error al crear paciente",
         error: error.message,
@@ -173,13 +167,13 @@ class PacienteController {
     }
   }
 
-  // ✅ Actualizar paciente (solo el propio si es rol paciente)
+  // Actualizar datos de un paciente (si es rol "paciente", solo puede modificar su propio perfil)
   async actualizarPaciente(req, res) {
     const id = req.params.id;
-    const rolUsuario = req.user.rol;    // rol extraído del token
-    const idUsuario = req.user.id;      // id extraído del token
+    const rolUsuario = req.usuario.rol;    // Rol tomado del token
+    const idUsuario = req.usuario.id;      // ID tomado del token
 
-    // ⚠️ Si es paciente, no puede modificar otros pacientes
+    // Restringir que un paciente edite los datos de otro
     if (rolUsuario === 'paciente' && idUsuario !== id) {
       return res.status(403).json({ mensaje: 'No tienes permiso para modificar otro paciente' });
     }
@@ -204,6 +198,11 @@ class PacienteController {
         return res.status(404).json({ message: "Paciente no encontrado" });
       }
 
+      const emailduplicado= await Usuario.findOne({ where: { email } });
+      if (emailduplicado)
+        return res.status(409).json({ message: "El correo ya está registrado por otro usuario" });
+
+      // Actualizar ambos registros (usuario y paciente)
       await usuario.update({ nombre, apellido, email, password, rol, foto_perfil });
       await paciente.update({ fecha_nacimiento, celular, genero });
 
@@ -216,7 +215,7 @@ class PacienteController {
     }
   }
 
-  // ✅ Eliminar un paciente y su usuario
+  // Eliminar un paciente y su usuario asociado
   async eliminarPaciente(req, res) {
     const id = req.params.id;
     const t = await Usuario.sequelize.transaction();
@@ -229,7 +228,7 @@ class PacienteController {
         return res.status(404).json({ message: "Paciente no encontrado" });
       }
 
-      // Elimina primero paciente, luego usuario (dentro de la misma transacción)
+      // Eliminar primero el paciente y luego el usuario (transacción)
       await paciente.destroy({ transaction: t });
       await usuario.destroy({ transaction: t });
 
@@ -246,5 +245,5 @@ class PacienteController {
   }
 }
 
-// Exportamos una instancia para ser usada en las rutas
+// Exportamos instancia lista para usarse en las rutas
 export default new PacienteController();

@@ -1,4 +1,4 @@
-const dbConfig = {
+const dbConfiguracion = {
   HOST: 'localhost',         // Dirección del servidor de base de datos, en este caso es local
   USER: 'root',              // Usuario de la base de datos
   PASSWORD: '',              // Contraseña de ese usuario (modifícalo si usas una)
@@ -11,4 +11,4 @@ const dbConfig = {
     idle: 10000      // Tiempo de inactividad antes de cerrar una conexión (ms)
   }
 };
-export default dbConfig; // Exporta la configuración para que pueda ser utilizada en otros archivos
+export default dbConfiguracion; // Exporta la configuración para que pueda ser utilizada en otros archivos

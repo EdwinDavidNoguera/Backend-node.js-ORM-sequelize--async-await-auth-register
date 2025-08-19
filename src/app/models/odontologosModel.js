@@ -37,8 +37,5 @@ Odontologo.init(
   }
 );
 
-// Relación uno a uno entre Usuario y Odontologo
-Usuario.hasOne(Odontologo, { foreignKey: "id", as: "odontologo" }); // Un usuario puede tener un odontólogo
-Odontologo.belongsTo(Usuario, { foreignKey: "id", as: "usuario" }); // Un odontólogo pertenece a un usuario
 
 export default Odontologo; // Exportación del modelo para uso en otras partes de la aplicación

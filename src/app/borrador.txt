@@ -1,0 +1,15 @@
+
+//---------------------------------//
+//Admin
+//Node.js
+//pedro@gmail.com
+//admin123
+//
+//
+//paciente
+//Edwin@gmail.com
+//jJre8LwhT7
+//
+//odontologo
+//vale@gmail.com
+//vale123

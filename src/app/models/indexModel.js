@@ -2,24 +2,24 @@
 import sequelize from './db.js'; //esto se hizo para evitar problemas de circularidad
 
 // Importa la configuración de la base de datos (host, usuario, contraseña, etc.)
-import dbConfig from '../../config/dbConfig.js';
+import dbConfiguracion from '../../config/dbConfiguracion.js';
 
 // Este archivo tiene como propósito:
-// ✅ Inicializar Sequelize
-// ✅ Probar la conexión
-// ✅ Importar modelos
-// ✅ Exportar la instancia de Sequelize y los modelos
+//  Inicializar Sequelize
+//  Probar la conexión
+//  Importar modelos
+//  Exportar la instancia de Sequelize y los modelos
 
 // Función asincrónica para probar la conexión a la base de datos
 async function testConnection() {
   try {
     // Intenta autenticar la conexión con la base de datos, solo para verificar que todo esté correcto
     await sequelize.authenticate();
-    console.log(`Conexión a la base de datos de mySQL establecida correctamente. y corriendo en ${dbConfig.HOST}`);
+    console.log(`Conexión a la base de datos de mySQL establecida correctamente. y corriendo en ${dbConfiguracion.HOST}`);
 
     // Sincroniza todos los modelos con la base de datos
     await sequelize.sync(); 
-    console.log("✅ Modelos sincronizados con la base de datos.");
+    console.log(" Modelos sincronizados con la base de datos.");
 
   } catch (error) {
     // Captura y muestra cualquier error de conexión
@@ -31,19 +31,41 @@ async function testConnection() {
 import UsuarioModel from './usuariosModel.js';        // Modelo de usuarios
 import OdontologoModel from './odontologosModel.js';  // Modelo de odontólogos
 import PacienteModel from './pacientesModel.js';      // Modelo de pacientes
+import CitaModel from './citasModel.js';
+import ServicioModel from './serviciosModel.js';
 
-// Asignacion de los modelos para exportarlos
+// Asignación de los modelos para exportarlos
 const Usuario = UsuarioModel;
 const Odontologo = OdontologoModel;
 const Paciente = PacienteModel;
+const Cita = CitaModel;
+const Servicio = ServicioModel;
 
-// (Opcional) Aquí podría definir las relaciones entre modelos si no se fefinen en los modelos individuales
-// Ejemplo 
-// Usuario.hasOne(Paciente, { foreignKey: 'id', as: 'paciente' });
-// Paciente.belongsTo(Usuario, { foreignKey: 'id', as: 'usuario' });
-// Similar para Odontologo, Citas, etc.
+// ===============================
+// RELACIONES ENTRE MODELOS
+// ===============================
 
-// ⚠️ La sincronización con la base de datos generalmente debe hacerse desde el archivo src/index.js
+// Usuario <-> Paciente (1:1)
+Usuario.hasOne(Paciente, { foreignKey: 'id', as: 'paciente' });
+Paciente.belongsTo(Usuario, { foreignKey: 'id', as: 'usuario' });
+
+// Usuario <-> Odontologo (1:1)
+Usuario.hasOne(Odontologo, { foreignKey: 'id', as: 'odontologo' });
+Odontologo.belongsTo(Usuario, { foreignKey: 'id', as: 'usuario' });
+
+// Paciente <-> Cita (1:N)
+Paciente.hasMany(Cita, { foreignKey: 'pacienteId', as: 'citas' });
+Cita.belongsTo(Paciente, { foreignKey: 'pacienteId', as: 'paciente' });
+
+// Odontologo <-> Cita (1:N)
+Odontologo.hasMany(Cita, { foreignKey: 'odontologoId', as: 'citas' });
+Cita.belongsTo(Odontologo, { foreignKey: 'odontologoId', as: 'odontologo' });
+
+// Servicio <-> Cita (1:N)
+Servicio.hasMany(Cita, { foreignKey: 'servicioId', as: 'citas' });
+Cita.belongsTo(Servicio, { foreignKey: 'servicioId', as: 'servicio' });
+
+// La sincronización con la base de datos generalmente debe hacerse desde el archivo src/index.js
 // sequelize.sync({ force: false }).then(() => console.log('Base de datos sincronizada')); sin embargo 
 // se debe tener cuidado con el uso de { force: true } ya que elimina y recrea las tablas y se acomulan llaves 
 // primarias en la DB, lo que puede causar problemas si se usa en producción.
@@ -54,5 +76,7 @@ export {
   testConnection,  // Función para probar conexión y sincronización
   Usuario,         // Modelo Usuario
   Odontologo,      // Modelo Odontologo
-  Paciente         // Modelo Paciente
+  Paciente,        // Modelo Paciente
+  Cita,            // Modelo Cita
+  Servicio         // Modelo Servicio
 };
