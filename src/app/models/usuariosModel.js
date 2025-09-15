@@ -14,30 +14,48 @@ Usuario.init(
       autoIncrement: true,            // Se incrementa automáticamente
       primaryKey: true,               // Es la clave primaria
     },
+    
     nombre: {
       type: DataTypes.STRING,         // Tipo cadena
       allowNull: false,               // No puede ser nulo
     },
+
     apellido: {
       type: DataTypes.STRING,         // Tipo cadena
       allowNull: false,               // No puede ser nulo
     },
+
     email: {
       type: DataTypes.STRING,         // Tipo cadena
       allowNull: false,               // No puede ser nulo
       unique: true,                   // Debe ser único en la tabla
       validate: { isEmail: true },    // Validación: debe tener formato de correo
     },
+
     password: {
       type: DataTypes.STRING,         // Tipo cadena
       allowNull: false,               // No puede ser nulo
     },
+
     rol: {
       type: DataTypes.ENUM("admin", "odontologo", "paciente"), // Solo acepta uno de estos valores
       defaultValue: "paciente",       // Valor por defecto
+      allowNull: false,               // No puede ser nulo
     },
+
     foto_perfil: {
       type: DataTypes.STRING,         // Ruta o URL de la foto (cadena)
+      allowNull: true,                
+    },
+
+    celular: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+
+    genero: {
+      type: DataTypes.ENUM("masculino", "femenino", "otro"),
+      allowNull: true,
     },
     activo: {
       type: DataTypes.BOOLEAN,        // Valor booleano

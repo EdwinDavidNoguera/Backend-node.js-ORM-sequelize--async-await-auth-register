@@ -1,82 +1,114 @@
-// Importa la instancia de Sequelize desde el archivo db.js (configurada con parámetros de conexión)
-import sequelize from './db.js'; //esto se hizo para evitar problemas de circularidad
-
-// Importa la configuración de la base de datos (host, usuario, contraseña, etc.)
+import sequelize from './db.js';
 import dbConfiguracion from '../../config/dbConfiguracion.js';
 
-// Este archivo tiene como propósito:
-//  Inicializar Sequelize
-//  Probar la conexión
-//  Importar modelos
-//  Exportar la instancia de Sequelize y los modelos
 
-// Función asincrónica para probar la conexión a la base de datos
+/**
+ * Este archivo tiene como propósito:
+ * Inicializar Sequelize
+ * Probar la conexión
+ * Importar modelos
+ * Exportar la instancia de Sequelize y los modelos
+ */
+
+// Función para probar la conexión y sincronizar modelos
 async function testConnection() {
   try {
-    // Intenta autenticar la conexión con la base de datos, solo para verificar que todo esté correcto
     await sequelize.authenticate();
     console.log(`Conexión a la base de datos de mySQL establecida correctamente. y corriendo en ${dbConfiguracion.HOST}`);
-
-    // Sincroniza todos los modelos con la base de datos
-    await sequelize.sync(); 
-    console.log(" Modelos sincronizados con la base de datos.");
-
+    await sequelize.sync({ alter: true }); // en producion tener cuidado con force:true porque elimina y recrea las tablas
+    console.log("Modelos sincronizados con la base de datos.");
   } catch (error) {
-    // Captura y muestra cualquier error de conexión
     console.error('No se pudo conectar a la base de datos de mySQL:', error);
   }
 }
 
-// Importa los modelos individuales definidos en archivos separados
-import UsuarioModel from './usuariosModel.js';        // Modelo de usuarios
-import OdontologoModel from './odontologosModel.js';  // Modelo de odontólogos
-import PacienteModel from './pacientesModel.js';      // Modelo de pacientes
-import CitaModel from './citasModel.js';
-import ServicioModel from './serviciosModel.js';
-
 // Asignación de los modelos para exportarlos
-const Usuario = UsuarioModel;
-const Odontologo = OdontologoModel;
-const Paciente = PacienteModel;
-const Cita = CitaModel;
-const Servicio = ServicioModel;
+import Usuario from './usuariosModel.js';
+import Paciente from './pacientesModel.js';
+import Odontologo from './odontologosModel.js';
+import Consultorio from './consultorioOdontologicoModel.js';
+import Servicio from './serviciosModel.js';
+import Cita from './citasModel.js';
+import Historial from './historialOdontologicoModel.js';
+import Consulta from './consultaOdontologicaModel.js';
+import Tratamiento from './tratamientoOdontologicoModel.js';
+import Horario from './horarioOdontologoModel.js';
 
 // ===============================
 // RELACIONES ENTRE MODELOS
 // ===============================
 
 // Usuario <-> Paciente (1:1)
-Usuario.hasOne(Paciente, { foreignKey: 'id', as: 'paciente' });
+// al borrar un usuario, se borra su paciente asociado
+Usuario.hasOne(Paciente, { foreignKey: 'id', as: 'paciente', onDelete: 'CASCADE' });
 Paciente.belongsTo(Usuario, { foreignKey: 'id', as: 'usuario' });
 
 // Usuario <-> Odontologo (1:1)
-Usuario.hasOne(Odontologo, { foreignKey: 'id', as: 'odontologo' });
+// al borrar un usuario, se borra su odontologo asociado
+Usuario.hasOne(Odontologo, { foreignKey: 'id', as: 'odontologo', onDelete: 'CASCADE' });
 Odontologo.belongsTo(Usuario, { foreignKey: 'id', as: 'usuario' });
 
 // Paciente <-> Cita (1:N)
-Paciente.hasMany(Cita, { foreignKey: 'pacienteId', as: 'citas' });
+//al eliminar un paciente, se eliminan sus citas asociadas
+Paciente.hasMany(Cita, { foreignKey: 'pacienteId', as: 'citas', onDelete: 'CASCADE' });
 Cita.belongsTo(Paciente, { foreignKey: 'pacienteId', as: 'paciente' });
 
 // Odontologo <-> Cita (1:N)
-Odontologo.hasMany(Cita, { foreignKey: 'odontologoId', as: 'citas' });
+// al eliminar un odontologo, se eliminan sus citas asociadas
+Odontologo.hasMany(Cita, { foreignKey: 'odontologoId', as: 'citas', onDelete: 'CASCADE' });
 Cita.belongsTo(Odontologo, { foreignKey: 'odontologoId', as: 'odontologo' });
 
 // Servicio <-> Cita (1:N)
-Servicio.hasMany(Cita, { foreignKey: 'servicioId', as: 'citas' });
+// al eliminar un servicio, las citas que tenian ese servicio quedan con servicioId en null
+Servicio.hasMany(Cita, { foreignKey: 'servicioId', as: 'citas', onDelete: 'SET NULL' });
 Cita.belongsTo(Servicio, { foreignKey: 'servicioId', as: 'servicio' });
 
-// La sincronización con la base de datos generalmente debe hacerse desde el archivo src/index.js
-// sequelize.sync({ force: false }).then(() => console.log('Base de datos sincronizada')); sin embargo 
-// se debe tener cuidado con el uso de { force: true } ya que elimina y recrea las tablas y se acomulan llaves 
-// primarias en la DB, lo que puede causar problemas si se usa en producción.
+// Paciente <-> Historial (1:1)
+// un paciente tiene un historial, y un historial pertenece a un paciente.
+// la fk va en historial porque este depende de paciente y no al reves
+Paciente.hasOne(Historial, { foreignKey: 'pacienteId', as: 'historial', onDelete: 'CASCADE' });
+Historial.belongsTo(Paciente, { foreignKey: 'pacienteId', as: 'paciente' });
 
-// Exporta la instancia de sequelize y los modelos para usarlos en otros módulos del proyecto
+// Historial <-> Consulta (1:N)
+//un historial puede tener varias consultas, y cada consulta pertenece a un historial.
+// la fk ve en consulta porque pertenece a los muchon
+// al eliminar un historial, no se eliminan sus consultas asociadas
+Historial.hasMany(Consulta, { foreignKey: 'historialId', as: 'consultas' , onDelete: 'SET NULL' });
+Consulta.belongsTo(Historial, { foreignKey: 'historialId', as: 'historial' });
+
+// Cita <-> Consulta (1:1)
+// la fk va en consulta porque esta depende de cita y no al reves
+Cita.hasOne(Consulta, { foreignKey: 'citaId', as: 'consulta', onDelete: 'SET NULL' });
+Consulta.belongsTo(Cita, { foreignKey: 'citaId', as: 'cita' });
+
+// Consulta <-> Tratamiento (1:N)
+// la fk va en tratamiento porque es el lado de los muchos
+Consulta.hasMany(Tratamiento, { foreignKey: 'consultaId', as: 'tratamientos' });
+Tratamiento.belongsTo(Consulta, { foreignKey: 'consultaId', as: 'consulta' });
+
+// Odontologo <-> Consultorio (1:N) 
+Consultorio.hasOne(Odontologo, {foreignKey: "consultorioId", as: "odontologos", onDelete: "SET NULL"});
+Odontologo.belongsTo(Consultorio, {foreignKey: "consultorioId", as: "consultorio"});
+
+// Odontologo <-> Horario (1:N)
+Odontologo.hasMany(Horario, { foreignKey: "odontologoId", as: "horarios", onDelete: "CASCADE" });
+Horario.belongsTo(Odontologo, { foreignKey: "odontologoId", as: "odontologo" });
+
+
+// ===============================
+// EXPORTACIÓN DE MODELOS Y SEQUELIZE
+// ===============================
 export {
-  sequelize,       // Instancia de conexión Sequelize
-  testConnection,  // Función para probar conexión y sincronización
-  Usuario,         // Modelo Usuario
-  Odontologo,      // Modelo Odontologo
-  Paciente,        // Modelo Paciente
-  Cita,            // Modelo Cita
-  Servicio         // Modelo Servicio
+  sequelize,
+  testConnection,
+  Usuario,
+  Paciente,
+  Odontologo,
+  Consultorio,
+  Servicio,
+  Cita,
+  Historial,
+  Consulta,
+  Tratamiento,
+  Horario
 };

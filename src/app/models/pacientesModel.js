@@ -12,21 +12,10 @@ Paciente.init(
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
-      references: {
-        model: Usuario, // Referencia al modelo Usuario
-        key: "id",       // Llave foránea
-      },
     },
     // Campo para almacenar la fecha de nacimiento del paciente
-    fecha_nacimiento: { type: DataTypes.DATEONLY },
-
-    // Campo para almacenar el número de celular
-    celular: { type: DataTypes.STRING },
-
-    // Campo para el género con un conjunto definido de valores permitidos
-    genero: {
-      type: DataTypes.ENUM("masculino", "femenino", "otro"),
-    },
+    fecha_nacimiento: { type: DataTypes.DATEONLY, allowNull: false },
+  
   },
   {
     sequelize,             // Instancia de conexión con la base de datos

@@ -13,3 +13,978 @@
 //odontologo
 //vale@gmail.com
 //vale123
+
+
+
+
+ if (rol === 'paciente') {
+        // El paciente puede ver todos sus historiales
+        const historiales = await Historial.findAll({
+          where: { pacienteId: req.usuario.id },
+          include: [{ model: Paciente, as: 'paciente' }]
+        });
+        if (!historiales || historiales.length === 0) {
+          return res.status(404).json({ error: `No se encontró historial para el paciente con ID ${req.usuario.id}.` });
+        }
+
+
+        if (rol === 'paciente') {
+        // Si el usuario es paciente, solo puede ver su propio historial
+        const historial = await Historial.findAll({
+          where: { pacienteId: req.usuario.id }, // Busca por el id del paciente en el token
+          include: [{ model: Paciente, as: 'paciente' }] // Incluye datos del paciente
+        });
+        if (!historial) {
+          // Si no existe historial, responde con error
+          return res.status(404).json({ error: `No se encontró historial para el paciente con ID ${req.usuario.id}.` });
+        }
+
+
+
+
+ALTER TABLE odontologos DROP INDEX numero_licencia;
+ALTER TABLE odontologos DROP INDEX numero_licencia_2;
+ALTER TABLE odontologos DROP INDEX numero_licencia_3;
+ALTER TABLE odontologos DROP INDEX numero_licencia_4;
+ALTER TABLE odontologos DROP INDEX numero_licencia_5;
+ALTER TABLE odontologos DROP INDEX numero_licencia_6;
+ALTER TABLE odontologos DROP INDEX numero_licencia_7;
+ALTER TABLE odontologos DROP INDEX numero_licencia_8;
+ALTER TABLE odontologos DROP INDEX numero_licencia_9;
+ALTER TABLE odontologos DROP INDEX numero_licencia_10;
+ALTER TABLE odontologos DROP INDEX numero_licencia_11;
+ALTER TABLE odontologos DROP INDEX numero_licencia_12;
+ALTER TABLE odontologos DROP INDEX numero_licencia_13;
+ALTER TABLE odontologos DROP INDEX numero_licencia_14;
+ALTER TABLE odontologos DROP INDEX numero_licencia_15;
+ALTER TABLE odontologos DROP INDEX numero_licencia_16;
+ALTER TABLE odontologos DROP INDEX numero_licencia_17;
+ALTER TABLE odontologos DROP INDEX numero_licencia_18;
+ALTER TABLE odontologos DROP INDEX numero_licencia_19;
+ALTER TABLE odontologos DROP INDEX numero_licencia_20;
+ALTER TABLE odontologos DROP INDEX numero_licencia_21;
+ALTER TABLE odontologos DROP INDEX numero_licencia_22;
+ALTER TABLE odontologos DROP INDEX numero_licencia_23;
+ALTER TABLE odontologos DROP INDEX numero_licencia_24;
+ALTER TABLE odontologos DROP INDEX numero_licencia_25;
+ALTER TABLE odontologos DROP INDEX numero_licencia_26;
+ALTER TABLE odontologos DROP INDEX numero_licencia_27;
+ALTER TABLE odontologos DROP INDEX numero_licencia_28;
+ALTER TABLE odontologos DROP INDEX numero_licencia_29;
+ALTER TABLE odontologos DROP INDEX numero_licencia_30;
+ALTER TABLE odontologos DROP INDEX numero_licencia_31;
+ALTER TABLE odontologos DROP INDEX numero_licencia_32;
+ALTER TABLE odontologos DROP INDEX numero_licencia_33;
+ALTER TABLE odontologos DROP INDEX numero_licencia_34;
+ALTER TABLE odontologos DROP INDEX numero_licencia_35;
+ALTER TABLE odontologos DROP INDEX numero_licencia_36;
+ALTER TABLE odontologos DROP INDEX numero_licencia_37;
+ALTER TABLE odontologos DROP INDEX numero_licencia_38;
+ALTER TABLE odontologos DROP INDEX numero_licencia_39;
+ALTER TABLE odontologos DROP INDEX numero_licencia_40;
+ALTER TABLE odontologos DROP INDEX numero_licencia_41;
+ALTER TABLE odontologos DROP INDEX numero_licencia_42;
+ALTER TABLE odontologos DROP INDEX numero_licencia_43;
+ALTER TABLE odontologos DROP INDEX numero_licencia_44;
+ALTER TABLE odontologos DROP INDEX numero_licencia_45;
+ALTER TABLE odontologos DROP INDEX numero_licencia_46;
+ALTER TABLE odontologos DROP INDEX numero_licencia_47;
+ALTER TABLE odontologos DROP INDEX numero_licencia_48;
+ALTER TABLE odontologos DROP INDEX numero_licencia_49;
+ALTER TABLE odontologos DROP INDEX numero_licencia_50;
+ALTER TABLE odontologos DROP INDEX numero_licencia_51;
+ALTER TABLE odontologos DROP INDEX numero_licencia_52;
+ALTER TABLE odontologos DROP INDEX numero_licencia_53;
+ALTER TABLE odontologos DROP INDEX numero_licencia_54;
+ALTER TABLE odontologos DROP INDEX numero_licencia_55;
+ALTER TABLE odontologos DROP INDEX numero_licencia_56;
+ALTER TABLE odontologos DROP INDEX numero_licencia_57;
+ALTER TABLE odontologos DROP INDEX numero_licencia_58;
+ALTER TABLE odontologos DROP INDEX numero_licencia_59;
+ALTER TABLE odontologos DROP INDEX numero_licencia_60;
+ALTER TABLE odontologos DROP INDEX numero_licencia_61;
+ALTER TABLE odontologos DROP INDEX numero_licencia_62;
+ALTER TABLE odontologos DROP INDEX numero_licencia_63;
+ALTER TABLE odontologos DROP INDEX numero_licencia_64;
+
+
+
+
+
+
+
+ALTER TABLE usuarios DROP INDEX email_1;
+ALTER TABLE usuarios DROP INDEX email_2;
+ALTER TABLE usuarios DROP INDEX email_3;
+ALTER TABLE usuarios DROP INDEX email_4;
+ALTER TABLE usuarios DROP INDEX email_5;
+ALTER TABLE usuarios DROP INDEX email_6;
+ALTER TABLE usuarios DROP INDEX email_7;
+ALTER TABLE usuarios DROP INDEX email_8;
+ALTER TABLE usuarios DROP INDEX email_9;
+ALTER TABLE usuarios DROP INDEX email_10;
+ALTER TABLE usuarios DROP INDEX email_11;
+ALTER TABLE usuarios DROP INDEX email_12;
+ALTER TABLE usuarios DROP INDEX email_13;
+ALTER TABLE usuarios DROP INDEX email_14;
+ALTER TABLE usuarios DROP INDEX email_15;
+ALTER TABLE usuarios DROP INDEX email_16;
+ALTER TABLE usuarios DROP INDEX email_17;
+ALTER TABLE usuarios DROP INDEX email_18;
+ALTER TABLE usuarios DROP INDEX email_19;
+ALTER TABLE usuarios DROP INDEX email_20;
+ALTER TABLE usuarios DROP INDEX email_21;
+ALTER TABLE usuarios DROP INDEX email_22;
+ALTER TABLE usuarios DROP INDEX email_23;
+ALTER TABLE usuarios DROP INDEX email_24;
+ALTER TABLE usuarios DROP INDEX email_25;
+ALTER TABLE usuarios DROP INDEX email_26;
+ALTER TABLE usuarios DROP INDEX email_27;
+ALTER TABLE usuarios DROP INDEX email_28;
+ALTER TABLE usuarios DROP INDEX email_29;
+ALTER TABLE usuarios DROP INDEX email_30;
+ALTER TABLE usuarios DROP INDEX email_31;
+ALTER TABLE usuarios DROP INDEX email_32;
+ALTER TABLE usuarios DROP INDEX email_33;
+ALTER TABLE usuarios DROP INDEX email_34;
+ALTER TABLE usuarios DROP INDEX email_35;
+ALTER TABLE usuarios DROP INDEX email_36;
+ALTER TABLE usuarios DROP INDEX email_37;
+ALTER TABLE usuarios DROP INDEX email_38;
+ALTER TABLE usuarios DROP INDEX email_39;
+ALTER TABLE usuarios DROP INDEX email_40;
+ALTER TABLE usuarios DROP INDEX email_41;
+ALTER TABLE usuarios DROP INDEX email_42;
+ALTER TABLE usuarios DROP INDEX email_43;
+ALTER TABLE usuarios DROP INDEX email_44;
+ALTER TABLE usuarios DROP INDEX email_45;
+ALTER TABLE usuarios DROP INDEX email_46;
+ALTER TABLE usuarios DROP INDEX email_47;
+ALTER TABLE usuarios DROP INDEX email_48;
+ALTER TABLE usuarios DROP INDEX email_49;
+ALTER TABLE usuarios DROP INDEX email_50;
+ALTER TABLE usuarios DROP INDEX email_51;
+ALTER TABLE usuarios DROP INDEX email_52;
+ALTER TABLE usuarios DROP INDEX email_53;
+ALTER TABLE usuarios DROP INDEX email_54;
+ALTER TABLE usuarios DROP INDEX email_55;
+ALTER TABLE usuarios DROP INDEX email_56;
+ALTER TABLE usuarios DROP INDEX email_57;
+ALTER TABLE usuarios DROP INDEX email_58;
+ALTER TABLE usuarios DROP INDEX email_59;
+ALTER TABLE usuarios DROP INDEX email_60;
+ALTER TABLE usuarios DROP INDEX email_61;
+ALTER TABLE usuarios DROP INDEX email_62;
+ALTER TABLE usuarios DROP INDEX email_63;
+ALTER TABLE usuarios DROP INDEX email_64;
+
+
+
+
+//odontologo
+import Usuario from "../models/usuariosModel.js";       // Modelo de usuarios (tabla general de credenciales y datos básicos)
+import Odontologo from "../models/odontologosModel.js"; // Modelo de odontólogos (datos profesionales)
+import bcrypt from 'bcrypt';    
+import {Consultorio} from "../models/indexModel.js";       //indexModel exporta varios                  // Para encriptar contraseñas
+
+/**
+ * Controlador para la gestión de odontólogos
+ * se recomienda usar un archivo global de validaciones para 
+ * mejorar la mantenibilidad del código
+ */
+class OdontologoController {
+
+  //  Obtener todos los odontólogos junto con sus datos de usuario
+  async obtenerOdontologos(req, res) {
+    try {
+      const odontologos = await Odontologo.findAll({
+        include: { model: Usuario, as: "usuario" }, // Relación con la tabla de usuarios
+      });
+
+      //odontologos aplanados
+      const odontologosAplanados = odontologos.map(odontologo => {
+        return {
+          id: odontologo.id,
+          nombre: odontologo.usuario.nombre,
+          apellido: odontologo.usuario.apellido,
+          email: odontologo.usuario.email,
+          especialidad: odontologo.especialidad,
+          numero_licencia: odontologo.numero_licencia,
+          descripcion: odontologo.descripcion,
+          consultorioId: odontologo.consultorioId
+        };
+      });
+      res.json(odontologosAplanados);
+    } catch (error) {
+      res.status(500).json({
+        message: "Error al obtener odontólogos",
+        error: error.message,
+      });
+    }
+  }
+
+  // Obtener un odontólogo por su ID
+  async obtenerOdontologoPorId(req, res) {
+    const id = req.params.id;
+    try {
+      const odontologo = await Odontologo.findByPk(id, {
+        include: { model: Usuario, as: "usuario" }, // Incluye también datos de usuario
+      });
+
+      if (!odontologo) {
+        return res.status(404).json({
+          message: `No se encontró ningún odontólogo con el ID ${id}`,
+        });
+      }
+
+      res.json(odontologo);
+    } catch (error) {
+      res.status(500).json({
+        message: "Error al obtener odontólogo",
+        error: error.message,
+      });
+    }
+  }
+
+  async crearOdontologo(req, res) {
+  const {
+    nombre,
+    apellido,
+    email,
+    password,
+    rol = "odontologo",
+    foto_perfil,
+    consultorioId,
+    especialidad,
+    numero_licencia,
+    descripcion
+  } = req.body;
+
+  // Objeto para recolectar errores por campo
+  const errores = {};
+
+  // Validaciones de campos obligatorios
+  if (!nombre) errores.nombre = "El nombre es obligatorio";
+  if (!apellido) errores.apellido = "El apellido es obligatorio";
+  if (!email) errores.email = "El email es obligatorio";
+  if (!password) errores.password = "La contraseña es obligatoria";
+  if (!especialidad) errores.especialidad = "La especialidad es obligatoria";
+  if (!numero_licencia) errores.numero_licencia = "El número de licencia es obligatorio";
+  if (!consultorioId) errores.consultorioId = "El consultorio es obligatorio";
+
+  // Regex para validaciones
+  const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const regexLicencia = /^[A-Za-z0-9\-]+$/;
+  const regexPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+
+  // Validaciones adicionales si los campos están presentes
+  if (email && !regexEmail.test(email)) errores.email = "El email no es válido";
+  if (password && !regexPassword.test(password)) errores.password = 
+    "La contraseña debe tener al menos 8 caracteres, incluir mayúsculas, minúsculas, números y caracteres especiales";
+  if (numero_licencia && !regexLicencia.test(numero_licencia)) errores.numero_licencia = "Número de licencia no válido";
+
+  // Verificar si email o número de licencia ya existen
+  if (email) {
+    const emailExistente = await Usuario.findOne({ where: { email } });
+    if (emailExistente) errores.email = "El email ya está en uso";
+  }
+
+  if (numero_licencia) {
+    const licenciaExistente = await Odontologo.findOne({ where: { numero_licencia } });
+    if (licenciaExistente) errores.numero_licencia = "El número de licencia ya está en uso";
+  }
+
+  // Validar consultorio
+  if (consultorioId) {
+    const consultorioExistente = await Consultorio.findByPk(consultorioId);
+    if (!consultorioExistente) errores.consultorioId = "El consultorio no existe";
+    else if (consultorioExistente.odontologoId) errores.consultorioId = "El consultorio ya está ocupado";
+  }
+
+  // Si hay errores, devolverlos todos
+  if (Object.keys(errores).length > 0) {
+    return res.status(400).json({ errores });
+  }
+
+  // Crear usuario y odontólogo dentro de una transacción
+  const t = await Usuario.sequelize.transaction();
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const nuevoUsuario = await Usuario.create(
+      { nombre, apellido, email, password: hashedPassword, rol, foto_perfil },
+      { transaction: t }
+    );
+
+    const nuevoOdontologo = await Odontologo.create(
+      {
+        id: nuevoUsuario.id,
+        consultorioId,
+        especialidad,
+        numero_licencia,
+        descripcion
+      },
+      { transaction: t }
+    );
+
+    await t.commit();
+
+    res.status(201).json({
+      message: "Odontólogo creado exitosamente",
+      usuario: nuevoUsuario,
+      odontologo: nuevoOdontologo,
+    });
+  } catch (error) {
+    await t.rollback();
+    res.status(500).json({
+      message: "Error al crear odontólogo",
+      error: error.message,
+    });
+  }
+}
+
+
+  // Actualizar datos de un odontólogo y su usuario asociado
+async actualizarOdontologo(req, res) {
+  const id = req.params.id;
+  const {
+    consultorioId,
+    nombre,
+    apellido,
+    email,
+    password,
+    rol,
+    foto_perfil,
+    especialidad,
+    numero_licencia,
+    descripcion
+  } = req.body;
+
+  const errores = {};
+
+  try {
+    const usuario = await Usuario.findByPk(id);
+    const odontologo = await Odontologo.findByPk(id);
+
+    if (!usuario || !odontologo) {
+      return res.status(404).json({ message: "Odontólogo no encontrado" });
+    }
+
+    // Regex de validaciones
+    const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const regexLicencia = /^[A-Za-z0-9\-]+$/;
+    const regexPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+
+    // Validar email solo si se envió y cambió
+    if (email && email !== usuario.email) {
+      if (!regexEmail.test(email)) {
+        errores.email = "El email no es válido";
+      }
+
+      const emailExistente = await Usuario.findOne({ where: { email } });
+      if (emailExistente) {
+        errores.email = "El email ya está en uso";
+      }
+    }
+
+    // Validar contraseña solo si se envió
+    let passwordHash;
+    if (password) {
+      if (!regexPassword.test(password)) {
+        errores.password = "La contraseña debe tener al menos 8 caracteres, entre números, letras mayúsculas y minúsculas, caracteres especiales";
+      }
+      passwordHash = await bcrypt.hash(password, 10);
+    }
+
+    // Validar número de licencia solo si se envió y cambió , no muy util
+    if (numero_licencia && numero_licencia !== odontologo.numero_licencia) {
+      if (!regexLicencia.test(numero_licencia)) {
+        errores.numero_licencia = "El número de licencia no es válido";
+      }
+
+      const licenciaExistente = await Odontologo.findOne({ where: { numero_licencia } });
+      if (licenciaExistente) {
+        errores.numero_licencia = "El número de licencia ya está en uso";
+      }
+    }
+
+    // Validar consultorio solo si se envió
+    if (consultorioId) {
+      const consultorioExistente = await Consultorio.findByPk(consultorioId);
+      if (!consultorioExistente) {
+        errores.consultorioId = "El consultorio no existe";
+      }
+      if (consultorioExistente.odontologoId && consultorioExistente.id !== odontologo.consultorioId) {
+        errores.consultorioId = "El consultorio ya está ocupado";
+      }
+    }
+    
+    // Si hay errores, devolverlos todos
+  if (Object.keys(errores).length > 0) {
+    return res.status(400).json({ errores });
+  }
+
+    // Actualizar datos (solo los que se enviaron)
+    await usuario.update({
+      nombre: nombre ?? usuario.nombre,
+      apellido: apellido ?? usuario.apellido,
+      email: email ?? usuario.email,
+      password: passwordHash ?? usuario.password,
+      rol: rol ?? usuario.rol,
+      foto_perfil: foto_perfil ?? usuario.foto_perfil
+    });
+
+    await odontologo.update({
+      especialidad: especialidad ?? odontologo.especialidad,
+      numero_licencia: numero_licencia ?? odontologo.numero_licencia,
+      descripcion: descripcion ?? odontologo.descripcion,
+      consultorioId: consultorioId ?? odontologo.consultorioId
+    });
+
+    res.json({ message: "Odontólogo actualizado correctamente" });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error al actualizar odontólogo",
+      error: error.message,
+    });
+  }
+}
+
+
+  // Eliminar un odontólogo (y su usuario relacionado)
+  async eliminarOdontologo(req, res) {
+    const id = req.params.id;
+    const t = await Usuario.sequelize.transaction();
+
+    try {
+      const odontologo = await Odontologo.findByPk(id);
+      const usuario = await Usuario.findByPk(id);
+
+      if (!odontologo || !usuario) {
+        return res.status(404).json({ message: "Odontólogo no encontrado" });
+      }
+
+      // Eliminar ambos registros en la misma transacción
+      await odontologo.destroy({ transaction: t });
+      await usuario.destroy({ transaction: t });
+
+      await t.commit(); // Confirmar borrado
+
+      res.json({ message: "Odontólogo y usuario eliminados correctamente" });
+    } catch (error) {
+      await t.rollback(); // Revertir si algo falla
+      res.status(500).json({
+        message: "Error al eliminar odontólogo",
+        error: error.message,
+      });
+    }
+  }
+}
+
+export default new OdontologoController();
+
+
+// pacientes
+
+import Usuario from "../models/usuariosModel.js";    // Modelo de usuario (datos generales de login y perfil)
+import Paciente from "../models/pacientesModel.js";  // Modelo de paciente (datos específicos del paciente)
+import bcrypt from 'bcrypt';                         // Librería para encriptar contraseñas
+
+/**
+ * Controlador para la gestión de pacientes
+ * se recomienda usar un archivo global de validaciones para 
+ * mejorar la mantenibilidad del código
+ */
+
+class PacienteController {
+
+  // Obtener todos los pacientes con sus datos de usuario asociados
+  async obtenerPacientes(req, res) {
+    try {
+      const pacientes = await Paciente.findAll({
+        include: { model: Usuario, as: "usuario" },  // JOIN con la tabla usuarios
+      });
+
+      // Se transforman los datos en un objeto más "aplanado" para el frontend, para facilitar su uso
+      const pacientesAplanados = pacientes.map(paciente => {
+        return {
+          id: paciente.id,
+          nombre: paciente.usuario?.nombre,            
+          apellido: paciente.usuario?.apellido,        
+          email: paciente.usuario?.email,              
+          rol: paciente.usuario?.rol,                  
+          foto_perfil: paciente.usuario?.foto_perfil,  
+          activo: paciente.usuario?.activo,            
+          fecha_nacimiento: paciente.fecha_nacimiento, 
+          celular: paciente.celular,
+          genero: paciente.genero,
+        };
+      });
+
+      res.json(pacientesAplanados);
+    } catch (error) {
+      res.status(500).json({
+        message: "Error al obtener pacientes",
+        error: error.message,
+      });
+    }
+  }
+
+  // Obtener un paciente específico por ID (incluye datos de usuario)
+  async obtenerPacientePorId(req, res) {
+    const id = req.params.id; // ID pasado en la URL, en el frontend seria /pacientes/:id
+    try {
+      const paciente = await Paciente.findByPk(id, {
+        include: { model: Usuario, as: "usuario" }, // JOIN con usuarios
+      });
+
+      if (!paciente) {
+        return res.status(404).json({
+          message: `No se encontró ningún paciente con el ID ${id}`,
+        });
+      }
+
+      res.json(paciente); //respuesta con el paciente encontrado
+    } catch (error) {
+      res.status(500).json({
+        message: "Error al obtener paciente",
+        error: error.message,
+      });
+    }
+  }
+
+  // Crear un nuevo paciente (crea tanto usuario como paciente en una transacción)
+  async crearPaciente(req, res) {
+    const {
+      nombre,
+      apellido,
+      email,
+      password,
+      rol = "paciente", // Por defecto el rol es paciente, el cliente no puede asignar otro rol
+      foto_perfil,
+      fecha_nacimiento,
+      celular,
+      genero,
+    } = req.body;
+
+    // Objeto para recolectar errores de validación
+    const errores = {};
+
+    // Validaciones de campos obligatorios
+    if (!nombre) errores.nombre = "El nombre es obligatorio";
+    if (!apellido) errores.apellido = "El apellido es obligatorio";
+    if (!email) errores.email = "El correo es obligatorio";
+    if (!password) errores.password = "La contraseña es obligatoria";
+    if (!celular) errores.celular = "El celular es obligatorio";
+    if (!fecha_nacimiento) errores.fecha_nacimiento = "La fecha de nacimiento es obligatoria";
+    if (!genero) errores.genero = "El género es obligatorio";
+
+    if (Object.keys(errores).length > 0) {
+      return res.status(400).json({ errores });
+    }
+
+    // Expresiones regulares para validaciones
+    const regexPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+    const regexCelular = /^[0-9]{10}$/;
+    const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const regexFechaNacimiento = /^\d{4}-\d{2}-\d{2}$/;
+
+    // Validación de email
+    if (!regexEmail.test(email)) {
+      errores.email = "El correo electrónico no es válido";
+    }
+
+    // Validación de contraseña fuerte
+    if (!regexPassword.test(password)) {
+      errores.password = "Contraseña insegura. Debe tener mínimo 8 caracteres, incluyendo mayúsculas, minúsculas, números y caracteres especiales.";
+    }
+
+    // Validación de celular
+    if (!regexCelular.test(celular)) {
+      errores.celular = "Celular inválido. Debe contener exactamente 10 dígitos.";
+    }
+    // Validación de fecha de nacimiento
+    if (!regexFechaNacimiento.test(fecha_nacimiento)) {
+      errores.fecha_nacimiento = "La fecha de nacimiento no es válida";
+    }
+
+    if (Object.keys(errores).length > 0) {
+      return res.status(400).json({ errores });
+    }
+
+    // Transacción para asegurar que usuario y paciente se creen juntos
+    const t = await Usuario.sequelize.transaction();
+
+    try {
+      // Encriptar la contraseña antes de guardar
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      // Verificar si el email ya existe en la base de datos
+      const usuarioExistente = await Usuario.findOne({ where: { email } });
+      if (usuarioExistente) {
+        return res.status(409).json({ message: "El correo ya está registrado" }); //en la respuesta
+      }
+
+      // Crear usuario
+      const nuevoUsuario = await Usuario.create(
+        {
+          nombre,
+          apellido,
+          email,
+          password: hashedPassword,
+          rol,
+          foto_perfil,
+        },
+        { transaction: t }
+      );
+
+      // Crear paciente asociado al usuario
+      const nuevoPaciente = await Paciente.create(
+        {
+          id: nuevoUsuario.id, // Se asegura la relación uno a uno
+          fecha_nacimiento,
+          celular,
+          genero,
+        },
+        { transaction: t }
+      );
+
+      await t.commit(); // Confirmar la transacción
+
+      res.status(201).json({
+        message: "Paciente creado exitosamente",
+        //usuario: nuevoUsuario,
+        paciente: nuevoPaciente,
+      });
+    } catch (error) {
+      await t.rollback(); // Revertir en caso de error
+      res.status(500).json({
+        message: "Error al crear paciente",
+        error: error.message,
+      });
+    }
+  }
+
+  // Actualizar datos de un paciente (si es rol "paciente", solo puede modificar su propio perfil)
+async actualizarPaciente(req, res) {
+  const id = req.params.id;
+  const rolUsuario = req.usuario.rol;    // Rol tomado del token
+  const idUsuario = req.usuario.id;      // ID tomado del token
+
+  // Restringir que un paciente edite los datos de otro por seguridad
+  if (rolUsuario === 'paciente' && idUsuario !== parseInt(id)) {
+    return res.status(403).json({ message: 'No tienes permiso para modificar otro paciente' });
+  }
+
+  const {
+    nombre,
+    apellido,
+    email,
+    password,
+    rol,
+    foto_perfil,
+    fecha_nacimiento,
+    celular,
+    genero
+  } = req.body;
+
+  try {
+    // Buscar usuario y paciente por ID
+    const usuario = await Usuario.findByPk(id);
+    const paciente = await Paciente.findByPk(id);
+
+    if (!usuario || !paciente) {
+      return res.status(404).json({ message: "Paciente no encontrado" });
+    }
+
+    // Objeto para acumular errores de validación
+    const errores = {};
+
+    // Expresiones regulares para validaciones
+    const regexCelular = /^[0-9]{10}$/; // Celular exactamente 10 dígitos
+    const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Email válido
+    const regexPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/; // Contraseña fuerte
+
+    // Validación de email
+    if (email && email !== usuario.email) {
+      if (!regexEmail.test(email)) {
+        errores.email = "El email no es válido";
+      } else {
+        // Verificar si el email ya existe en otro usuario
+        const emailExistente = await Usuario.findOne({ where: { email } });
+        if (emailExistente) {
+          errores.email = "El email ya está en uso";
+        }
+      }
+    }
+
+    // Validación de celular
+    if (celular) {
+      if (!regexCelular.test(celular)) {
+        errores.celular = "El celular no es válido. Debe contener exactamente 10 dígitos.";
+      }
+    }
+
+    // Validación de contraseña
+    let passwordHash;
+    if (password) {
+      if (!regexPassword.test(password)) {
+        errores.password = "La contraseña debe tener al menos 8 caracteres, incluyendo mayúsculas, minúsculas, números y caracteres especiales.";
+      } else {
+        passwordHash = await bcrypt.hash(password, 10);
+      }
+    }
+
+    // Si hay errores, devolverlos todos juntos y no continuar
+    if (Object.keys(errores).length > 0) {
+      return res.status(400).json({ errores });
+    }
+
+    // Actualización de usuario
+    await usuario.update({
+      nombre: nombre ?? usuario.nombre,
+      apellido: apellido ?? usuario.apellido,
+      email: email ?? usuario.email,
+      password: passwordHash ?? usuario.password,
+      rol: rol ?? usuario.rol,
+      foto_perfil: foto_perfil ?? usuario.foto_perfil
+    });
+
+    // Actualización de paciente
+    await paciente.update({
+      fecha_nacimiento: fecha_nacimiento ?? paciente.fecha_nacimiento,
+      celular: celular ?? paciente.celular,
+      genero: genero ?? paciente.genero
+    });
+
+    res.json({ message: "Paciente actualizado correctamente" });
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Error al actualizar paciente",
+      error: error.message,
+    });
+  }
+}
+
+
+  // Eliminar un paciente y su usuario asociado
+  async eliminarPaciente(req, res) {
+    const id = req.params.id;
+    const t = await Usuario.sequelize.transaction();
+
+    try {
+      const paciente = await Paciente.findByPk(id);
+      const usuario = await Usuario.findByPk(id);
+
+      if (!paciente || !usuario) {
+        return res.status(404).json({ message: "Paciente no encontrado" });
+      }
+
+      // Eliminar primero el paciente y luego el usuario (transacción)
+      await paciente.destroy({ transaction: t });
+      await usuario.destroy({ transaction: t });
+
+      await t.commit();
+
+      res.json({ message: "Paciente y usuario eliminados correctamente" });
+    } catch (error) {
+      await t.rollback();
+      res.status(500).json({
+        message: "Error al eliminar paciente",
+        error: error.message,
+      });
+    }
+  }
+
+  // Obtener el total de pacientes registrados
+async totalPacientes(req, res) {
+  try {
+    const total = await Paciente.count();
+    res.json({ total });
+  } catch (error) {
+    res.status(500).json({ errores: { general: "Error al obtener el total de usuarios", detalle: error.message } });
+  }
+}
+}
+
+// Exportamos instancia lista para usarse en las rutas
+export default new PacienteController();
+
+
+//Usuario controllers
+import Usuario from "../models/usuariosModel.js";      // Modelo de usuario (datos generales de login y perfil)
+import Paciente from "../models/pacientesModel.js";    // Modelo de paciente (si el usuario es paciente)
+import Odontologo from "../models/odontologosModel.js";// Modelo de odontólogo (si el usuario es odontólogo)
+import bcrypt from 'bcrypt';                           // Librería para encriptar contraseñas
+
+/**
+ * Controlador para la gestión de usuarios en general, se encarga de las operaciones CRUD
+ * y validaciones necesarias.
+ * Se recomienda usar un archivo global de validaciones para mejorar la mantenibilidad del código
+ * sim embargo, se apoya del servicio para la lógica de negocio y validaciones.
+ */
+
+class UsuarioController {
+
+  // Crear un nuevo usuario (y si corresponde, registrar también en paciente u odontólogo)
+  async crearUsuario(req, res) {
+    try {
+      // Extrae los datos enviados por el cliente
+      const { nombre, apellido, email, password, rol, foto_perfil } = req.body;
+      const errores = {}; // Diccionario para recolectar errores de validación
+
+      // Validaciones de campos obligatorios
+      if (!nombre) errores.nombre = "El nombre es obligatorio";
+      if (!apellido) errores.apellido = "El apellido es obligatorio";
+      if (!email) errores.email = "El correo es obligatorio";
+      if (!password) errores.password = "La contraseña es obligatoria";
+      if (!rol) errores.rol = "El rol es obligatorio";
+
+      // Validación de formato de correo electrónico
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (email && !emailRegex.test(email)) {
+        errores.email = "Correo electrónico inválido";
+      }
+
+      // Validación de roles permitidos
+      if (rol && !["paciente", "odontologo", "admin"].includes(rol)) {
+        errores.rol = "Rol inválido";
+      }
+
+      // Si hay errores, devolverlos todos juntos y no continuar
+      if (Object.keys(errores).length > 0) {
+        return res.status(400).json({ errores });
+      }
+
+      // Verificar si ya existe un usuario registrado con el mismo email
+      const usuarioExistente = await Usuario.findOne({ where: { email } });
+      if (usuarioExistente) {
+        errores.email = "El correo ya está registrado";
+        return res.status(409).json({ errores });
+      }
+
+      // Encriptar la contraseña antes de guardar en la base de datos
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      // Crear nuevo usuario en la tabla principal de usuarios
+      const nuevoUsuario = await Usuario.create({
+        nombre,
+        apellido,
+        email,
+        password: hashedPassword,
+        rol,
+        foto_perfil
+      });
+
+      // Si el usuario es paciente  crear registro en tabla pacientes
+      if (rol === "paciente") {
+        await Paciente.create({ usuarioId: nuevoUsuario.id });
+      } 
+      // Si el usuario es odontólogo  crear registro en tabla odontólogos
+      else if (rol === "odontologo") {
+        await Odontologo.create({ usuarioId: nuevoUsuario.id });
+      }
+
+      // Respuesta exitosa with el usuario creado
+      res.status(201).json({ message: "Usuario creado exitosamente", usuario: nuevoUsuario });
+    } catch (error) {
+      // Manejo de errores inesperados
+      res.status(500).json({ errores: { general: "Error del servidor", detalle: error.message } });
+    }
+  }
+
+  // Obtener todos los usuarios registrados
+  async obtenerUsuarios(req, res) {
+    try {
+      // Busca todos los usuarios en la base de datos
+      const usuarios = await Usuario.findAll();
+      res.json(usuarios); // Devuelve el array de usuarios
+    } catch (error) {
+      // Manejo de errores inesperados
+      res.status(500).json({ errores: { general: "Error al obtener usuarios", detalle: error.message } });
+    }
+  }
+
+  // Obtener un usuario por su ID
+  async obtenerUsuarioPorId(req, res) {
+    try {
+      const { id } = req.params; // ID pasado en la URL
+      const usuario = await Usuario.findByPk(id); // Busca el usuario por su ID
+      if (!usuario) return res.status(404).json({ errores: { general: "Usuario no encontrado" } });
+      res.json(usuario); // Devuelve el usuario encontrado
+    } catch (error) {
+      // Manejo de errores inesperados
+      res.status(500).json({ errores: { general: "Error al obtener el usuario", detalle: error.message } });
+    }
+  }
+
+  // Actualizar información de un usuario existente
+  async actualizarUsuario(req, res) {
+    try {
+      const { id } = req.params; // ID pasado en la URL
+      const { nombre, apellido, email, password, foto_perfil } = req.body;
+      const errores = {}; // Diccionario para recolectar errores de validación
+
+      // Busca el usuario por su ID
+      const usuario = await Usuario.findByPk(id);
+      if (!usuario) return res.status(404).json({ errores: { general: "Usuario no encontrado" } });
+
+      // Validación de email si se envía
+      if (email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+          errores.email = "Correo electrónico inválido";
+        }
+      }
+
+      // Validación de contraseña si se envía
+      if (password && password.length < 6) {
+        errores.password = "La contraseña debe tener al menos 6 caracteres";
+      }
+
+      // Si hay errores, devolverlos todos juntos y no continuar
+      if (Object.keys(errores).length > 0) {
+        return res.status(400).json({ errores });
+      }
+
+      // Encriptar la nueva contraseña si se envía
+      let hashedPassword = usuario.password;
+      if (password) {
+        hashedPassword = await bcrypt.hash(password, 10);
+      }
+
+      // Actualiza los datos del usuario
+      await usuario.update({
+        nombre: nombre ?? usuario.nombre,
+        apellido: apellido ?? usuario.apellido,
+        email: email ?? usuario.email,
+        password: hashedPassword,
+        foto_perfil: foto_perfil ?? usuario.foto_perfil,
+      });
+
+      res.json({ message: "Usuario actualizado correctamente", usuario });
+    } catch (error) {
+      // Manejo de errores inesperados
+      res.status(500).json({ errores: { general: "Error al actualizar el usuario", detalle: error.message } });
+    }
+  }
+
+  // Eliminar un usuario de la base de datos por ID
+  async eliminarUsuario(req, res) {
+    try {
+      const { id } = req.params; // ID pasado en la URL
+      const usuario = await Usuario.findByPk(id); // Busca el usuario por su ID
+      if (!usuario) return res.status(404).json({ errores: { general: "Usuario no encontrado" } });
+
+      await usuario.destroy(); // Elimina el usuario de la base de datos
+      res.json({ message: "Usuario eliminado correctamente" });
+    } catch (error) {
+      // Manejo de errores inesperados
+      res.status(500).json({ errores: { general: "Error al eliminar el usuario", detalle: error.message } });
+    }
+  }
+}
+
+// Exporta una instancia del controlador para usar en las rutas
+export default new UsuarioController();

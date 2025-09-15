@@ -30,8 +30,13 @@ Cita.init(
 
     servicioId: {
       type: DataTypes.INTEGER,
-      allowNull: false, // Obligatorio: cada cita debe estar asociada a un servicio
+      allowNull: true, // opcional
       references: { model: Servicio, key: "id" }, // Relación con la tabla "servicios"
+    },
+    consultorioId: {
+      type: DataTypes.INTEGER,
+      allowNull: false, // obligatorio: cada cita debe estar asociada a un consultorio
+      references: { model: "consultorios", key: "id" }, // Relación con la tabla "consultorios"
     },
 
     fecha: {
@@ -44,8 +49,9 @@ Cita.init(
       allowNull: false,
     },
 
+
     estado: {
-      type: DataTypes.ENUM("agendada", "confirmada", "completada", "cancelada"),
+      type: DataTypes.ENUM("agendada", "confirmada", "completada", "cancelada","ausente"),
       defaultValue: "agendada", // Valor por defecto al crear una nueva cita
     },
 

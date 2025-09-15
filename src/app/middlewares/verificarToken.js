@@ -28,7 +28,7 @@ export default function verificarToken(req, res, next) {
   try {
     // Verificar y decodificar el token con la clave secreta
     const decoded = jwt.verify(token, process.env.JWT_SECRETA);
-
+    console.log('Token decodificado:', decoded);
     // Guardar la información del token (ej: id, rol, email) en `req.usuario`
     // para que pueda ser usada en las siguientes rutas/middlewares
     req.usuario = decoded; 

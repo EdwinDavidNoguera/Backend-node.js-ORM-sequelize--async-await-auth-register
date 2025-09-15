@@ -1,5 +1,5 @@
 import express from 'express';
-import OdontologoController from '../controllers/odontologoController.js';
+import OdontologoController from '../controllers/odontologoController.js'; // Importa el controlador directamente desde odontólogoController.js
 const router = express.Router();
 import verificarRol from '../middlewares/verificarRol.js';
 import verificarToken from '../middlewares/verificarToken.js';

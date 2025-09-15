@@ -1,6 +1,11 @@
 // src/app/controllers/serviciosController.js
 import Servicio from "../models/serviciosModel.js";  // Importamos el modelo Servicio
 
+/**
+ * Este controlador maneja las operaciones CRUD para los servicios ofrecidos por la clínica dental.
+ * Incluye métodos para crear, leer, actualizar y eliminar servicios.
+ * Se apoya del servicio para la lógica de negocio y validaciones.
+ */
 class ServicioController {
 
   // Obtener todos los servicios disponibles

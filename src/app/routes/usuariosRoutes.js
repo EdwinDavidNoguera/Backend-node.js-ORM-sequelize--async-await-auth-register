@@ -10,7 +10,7 @@ router.route('/')
 
 // Rutas para /api/usuarios/:id
 router.route('/:id')
-  .get(UsuarioController.obtenerUsuarioPorId)   // Obtener un usuario por ID
+  .get(UsuarioController.obtenerUsuarios)   // Obtener un usuario por ID
   .put(UsuarioController.actualizarUsuario)     // Actualizar usuario por ID
   .delete(UsuarioController.eliminarUsuario);   // Eliminar usuario por ID
 

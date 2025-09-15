@@ -29,6 +29,7 @@ class CitasController {
       // Validación de formato de fecha (YYYY-MM-DD) y hora (HH:mm)
       const fechaRegex = /^\d{4}-\d{2}-\d{2}$/;
       const horaRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
+      const correoRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Expresión regular para validar correos
 
       if (!fechaRegex.test(fecha)) {
         return res.status(400).json({ error: "El formato de la fecha debe ser YYYY-MM-DD" });
@@ -36,6 +37,7 @@ class CitasController {
       if (!horaRegex.test(horaInicio)) {
         return res.status(400).json({ error: "El formato de la hora debe ser HH:mm (24 horas)" });
       }
+     
 
       // Validación: la fecha/hora no puede estar en el pasado
       const fechaHoraCita = new Date(`${fecha}T${horaInicio}:00`);
