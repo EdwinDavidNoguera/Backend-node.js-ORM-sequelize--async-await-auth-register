@@ -1,102 +1,80 @@
 import sequelize from './db.js';
 import dbConfiguracion from '../../config/dbConfiguracion.js';
 
+// Importación de modelos
+import Usuario from './usuarioModel.js';
+import Paciente from './pacienteModel.js';
+import Odontologo from './odontologoModel.js';
+import Consultorio from './consultorioModel.js';
+import Servicio from './serviciosModel.js';
+import Cita from './citaModel.js';
+import HistoriaOdontologica from './historiaOdontologicaModel.js';
+import PerfilOdontologo from './perfilOdontologoModel.js';
+import HorarioOdontologo from './horarioOdontologoModel.js';
 
 /**
- * Este archivo tiene como propósito:
- * Inicializar Sequelize
- * Probar la conexión
- * Importar modelos
- * Exportar la instancia de Sequelize y los modelos
+ * Función para probar la conexión y sincronizar modelos
  */
-
-// Función para probar la conexión y sincronizar modelos
 async function testConnection() {
   try {
     await sequelize.authenticate();
-    console.log(`Conexión a la base de datos de mySQL establecida correctamente. y corriendo en ${dbConfiguracion.HOST}`);
-    await sequelize.sync({ alter: true }); // en producion tener cuidado con force:true porque elimina y recrea las tablas
-    console.log("Modelos sincronizados con la base de datos.");
+    console.log(`Conexión a MariaDB establecida correctamente en ${dbConfiguracion.HOST}`);
+    
+    // alter: true ajusta las tablas existentes sin borrarlas, 
+    // ideal para esta migración con datos existentes.
+    await sequelize.sync({ alter: true, force: false }); 
+    console.log("Modelos sincronizados con la nueva estructura dental_life_plus2026.");
   } catch (error) {
-    console.error('No se pudo conectar a la base de datos de mySQL:', error);
+    console.error('Error al conectar o sincronizar la DB:', error);
+    process.exit(1);
   }
 }
 
-// Asignación de los modelos para exportarlos
-import Usuario from './usuariosModel.js';
-import Paciente from './pacientesModel.js';
-import Odontologo from './odontologosModel.js';
-import Consultorio from './consultorioOdontologicoModel.js';
-import Servicio from './serviciosModel.js';
-import Cita from './citasModel.js';
-import Historial from './historialOdontologicoModel.js';
-import Consulta from './consultaOdontologicaModel.js';
-import Tratamiento from './tratamientoOdontologicoModel.js';
-import Horario from './horarioOdontologoModel.js';
-
 // ===============================
-// RELACIONES ENTRE MODELOS
+// RELACIONES
 // ===============================
 
-// Usuario <-> Paciente (1:1)
-// al borrar un usuario, se borra su paciente asociado
-Usuario.hasOne(Paciente, { foreignKey: 'id', as: 'paciente', onDelete: 'CASCADE' });
-Paciente.belongsTo(Usuario, { foreignKey: 'id', as: 'usuario' });
+// 1. Usuario <-> Paciente (1:1)
+Usuario.hasOne(Paciente, { foreignKey: 'id_usuario', as: 'paciente', onDelete: 'CASCADE' });
+Paciente.belongsTo(Usuario, { foreignKey: 'id_usuario', as: 'usuario' });
 
-// Usuario <-> Odontologo (1:1)
-// al borrar un usuario, se borra su odontologo asociado
-Usuario.hasOne(Odontologo, { foreignKey: 'id', as: 'odontologo', onDelete: 'CASCADE' });
-Odontologo.belongsTo(Usuario, { foreignKey: 'id', as: 'usuario' });
+// 2. Usuario <-> Odontologo (1:1)
+Usuario.hasOne(Odontologo, { foreignKey: 'id_usuario', as: 'odontologo', onDelete: 'CASCADE' });
+Odontologo.belongsTo(Usuario, { foreignKey: 'id_usuario', as: 'usuario' });
 
-// Paciente <-> Cita (1:N)
-//al eliminar un paciente, se eliminan sus citas asociadas
-Paciente.hasMany(Cita, { foreignKey: 'pacienteId', as: 'citas', onDelete: 'CASCADE' });
-Cita.belongsTo(Paciente, { foreignKey: 'pacienteId', as: 'paciente' });
+// 3. Odontologo <-> Perfil (1:1)
+Odontologo.hasOne(PerfilOdontologo, { foreignKey: 'id_odontologo', as: 'perfil', onDelete: 'CASCADE' });
+PerfilOdontologo.belongsTo(Odontologo, { foreignKey: 'id_odontologo', as: 'odontologo' });
 
-// Odontologo <-> Cita (1:N)
-// al eliminar un odontologo, se eliminan sus citas asociadas
-Odontologo.hasMany(Cita, { foreignKey: 'odontologoId', as: 'citas', onDelete: 'CASCADE' });
-Cita.belongsTo(Odontologo, { foreignKey: 'odontologoId', as: 'odontologo' });
+// 4. Consultorio <-> Odontologo (1:1)
+Consultorio.hasOne(Odontologo, { foreignKey: 'id_consultorio', as: 'odontologoAsignado', onDelete: 'SET NULL' });
+Odontologo.belongsTo(Consultorio, { foreignKey: 'id_consultorio', as: 'consultorio' });
 
-// Servicio <-> Cita (1:N)
-// al eliminar un servicio, las citas que tenian ese servicio quedan con servicioId en null
-Servicio.hasMany(Cita, { foreignKey: 'servicioId', as: 'citas', onDelete: 'SET NULL' });
-Cita.belongsTo(Servicio, { foreignKey: 'servicioId', as: 'servicio' });
+// 5. Odontologo <-> Horarios (1:N)
+Odontologo.hasMany(HorarioOdontologo, { foreignKey: 'id_odontologo', as: 'horarios', onDelete: 'CASCADE' });
+HorarioOdontologo.belongsTo(Odontologo, { foreignKey: 'id_odontologo', as: 'odontologo' });
 
-// Paciente <-> Historial (1:1)
-// un paciente tiene un historial, y un historial pertenece a un paciente.
-// la fk va en historial porque este depende de paciente y no al reves
-Paciente.hasOne(Historial, { foreignKey: 'pacienteId', as: 'historial', onDelete: 'CASCADE' });
-Historial.belongsTo(Paciente, { foreignKey: 'pacienteId', as: 'paciente' });
+// 6. CITA - Relaciones principales (1:N)
+// Paciente -> Citas
+Paciente.hasMany(Cita, { foreignKey: 'id_paciente', as: 'citas', onDelete: 'SET NULL' });
+Cita.belongsTo(Paciente, { foreignKey: 'id_paciente', as: 'paciente' });
 
-// Historial <-> Consulta (1:N)
-//un historial puede tener varias consultas, y cada consulta pertenece a un historial.
-// la fk ve en consulta porque pertenece a los muchon
-// al eliminar un historial, no se eliminan sus consultas asociadas
-Historial.hasMany(Consulta, { foreignKey: 'historialId', as: 'consultas' , onDelete: 'SET NULL' });
-Consulta.belongsTo(Historial, { foreignKey: 'historialId', as: 'historial' });
+// Odontologo -> Citas
+Odontologo.hasMany(Cita, { foreignKey: 'id_odontologo', as: 'citas', onDelete: 'SET NULL' });
+Cita.belongsTo(Odontologo, { foreignKey: 'id_odontologo', as: 'odontologo' });
 
-// Cita <-> Consulta (1:1)
-// la fk va en consulta porque esta depende de cita y no al reves
-Cita.hasOne(Consulta, { foreignKey: 'citaId', as: 'consulta', onDelete: 'SET NULL' });
-Consulta.belongsTo(Cita, { foreignKey: 'citaId', as: 'cita' });
+// Servicio -> Citas
+Servicio.hasMany(Cita, { foreignKey: 'id_servicio', as: 'citas', onDelete: 'SET NULL' });
+Cita.belongsTo(Servicio, { foreignKey: 'id_servicio', as: 'servicio' });
 
-// Consulta <-> Tratamiento (1:N)
-// la fk va en tratamiento porque es el lado de los muchos
-Consulta.hasMany(Tratamiento, { foreignKey: 'consultaId', as: 'tratamientos' });
-Tratamiento.belongsTo(Consulta, { foreignKey: 'consultaId', as: 'consulta' });
-
-// Odontologo <-> Consultorio (1:N) 
-Consultorio.hasOne(Odontologo, {foreignKey: "consultorioId", as: "odontologos", onDelete: "SET NULL"});
-Odontologo.belongsTo(Consultorio, {foreignKey: "consultorioId", as: "consultorio"});
-
-// Odontologo <-> Horario (1:N)
-Odontologo.hasMany(Horario, { foreignKey: "odontologoId", as: "horarios", onDelete: "CASCADE" });
-Horario.belongsTo(Odontologo, { foreignKey: "odontologoId", as: "odontologo" });
+// 7. Cita <-> Historia Odontológica (1:1)
+// En tu nuevo SQL, la historia clínica se registra por cada cita atendida
+Cita.hasOne(HistoriaOdontologica, { foreignKey: 'id_cita', as: 'historia', onDelete: 'CASCADE' });
+HistoriaOdontologica.belongsTo(Cita, { foreignKey: 'id_cita', as: 'cita' });
 
 
 // ===============================
-// EXPORTACIÓN DE MODELOS Y SEQUELIZE
+// EXPORTACIÓN
 // ===============================
 export {
   sequelize,
@@ -107,8 +85,7 @@ export {
   Consultorio,
   Servicio,
   Cita,
-  Historial,
-  Consulta,
-  Tratamiento,
-  Horario
+  HistoriaOdontologica,
+  PerfilOdontologo,
+  HorarioOdontologo
 };

@@ -1,69 +1,71 @@
-import Usuario from "../models/usuariosModel.js";
+import { Usuario } from "../models/usuarioModel.js"; // Asegúrate de importar desde tu index centralizado
 import bcrypt from "bcrypt";
 import AppError from "../utils/errors/appError.js";
 
 class UsuarioService {
   
-  // ========== VALIDACIONES ==========
-  static validarDatosGenerales({ nombre, apellido, email, celular, password }) {
+  // === VALIDACIONES Y ESPACIOS VACIOS ===
+  // Ahora solo validamos lo que le pertenece estrictamente a la tabla 'usuario'
+  static validarDatosCredenciales({ email, password }) {
     const errores = {};
 
-    if (!nombre) errores.nombre = "El nombre es obligatorio";
-    if (!apellido) errores.apellido = "El apellido es obligatorio";
     if (!email) errores.email = "El correo es obligatorio";
     if (!password) errores.password = "La contraseña es obligatoria"; 
 
-
     const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const regexPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
-    const regexCelular = /^\+?[1-9]\d{1,14}$/; // Formato E.164
-
     if (email && !regexEmail.test(email)) {
       errores.email = "El correo electrónico no es válido";
     }
 
+    // Validación fuerte de contraseña (mínimo 8 caracteres, mayúscula, minúscula, número, especial)
+    const regexPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
     if (password && !regexPassword.test(password)) {
       errores.password =
         "La contraseña debe tener mínimo 8 caracteres, incluyendo mayúsculas, minúsculas, números y caracteres especiales.";
     }
 
-    if (celular && !regexCelular.test(celular)) {
-      errores.celular = "El número de celular no parece válido, rectifique colocando algo como 3001234567";
-    }
-
     if (Object.keys(errores).length > 0) {
       throw new AppError("Error de validación", 400, errores);
     }
-
   }
 
   // ========== CRUD GENERAL ==========
 
-  // Crear usuario
-  static async crearUsuario({ nombre, apellido, email, password, rol, foto_perfil, celular, genero, transaction }) {
-    this.validarDatosGenerales({ nombre, apellido, email, password, celular });
+  // Crear usuario (Estrictamente credenciales)
+  static async crearUsuario({ email, password, rol, avatar, transaction }) {
+    this.validarDatosCredenciales({ email, password });
 
-    // Verificar duplicados
+    // Verificar duplicados (Opcional, pero recomendado hacerlo aquí antes de que truene la BD)
     const usuarioExistente = await Usuario.findOne({ where: { email } });
     if (usuarioExistente) {
       throw new AppError("El correo ya está registrado", 409);
     }
 
     // Encriptar contraseña
+    // Nota: Si implementaste el Hook en el modelo que te sugerí antes, puedes quitar esta línea de bcrypt.
+    // Lo dejo por seguridad en caso de que no lo hayas puesto.
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Crear usuario
+    // Crear usuario (Solo campos permitidos en la BD)
     const nuevoUsuario = await Usuario.create(
-      { nombre, apellido, email, password: hashedPassword, rol, foto_perfil , celular, genero },
+      { 
+        email, 
+        password: hashedPassword, 
+        rol, 
+        avatar: avatar || 'default-avatar.png' 
+      },
       { transaction }
     );
 
     return nuevoUsuario;
   }
 
-  // Buscar usuario por ID
+  // Buscar usuario por ID (Ocultando la contraseña por seguridad)
   static async obtenerUsuarioPorId(id) {
-    const usuario = await Usuario.findByPk(id);
+    const usuario = await Usuario.findByPk(id, {
+      attributes: { exclude: ['password'] } // Buena práctica: no devolver el hash
+    });
+    
     if (!usuario) {
       throw new AppError("Usuario no encontrado", 404);
     }
@@ -72,32 +74,34 @@ class UsuarioService {
 
   // Buscar todos los usuarios
   static async obtenerUsuarios() {
-    return await Usuario.findAll();
+    return await Usuario.findAll({
+      attributes: { exclude: ['password'] }
+    });
   }
 
   // Actualizar usuario
-  static async actualizarUsuario(id, datos) {
+  static async actualizarUsuario(id, datos, transaction) {
     const usuario = await Usuario.findByPk(id);
     if (!usuario) {
       throw new AppError("Usuario no encontrado", 404);
     }
 
-    const { nombre, apellido, email, password, foto_perfil, celular, genero } = datos;
+    const { email, password, avatar, activo, rol } = datos;
     const errores = {};
 
     // Validación email
-    const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (email && email !== usuario.email) {
+      const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!regexEmail.test(email)) errores.email = "El correo electrónico no es válido";
+      
       const emailExistente = await Usuario.findOne({ where: { email } });
       if (emailExistente) errores.email = "El correo ya está en uso";
     }
 
-    // Validación contraseña
+    // Validación y encriptación de contraseña
     let passwordHash;
     if (password) {
-      const regexPassword =
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+      const regexPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
       if (!regexPassword.test(password)) {
         errores.password =
           "La contraseña debe tener mínimo 8 caracteres, incluyendo mayúsculas, minúsculas, números y caracteres especiales.";
@@ -106,27 +110,24 @@ class UsuarioService {
       }
     }
 
-    // Validación celular
-    const regexCelular = /^\+?[1-9]\d{1,14}$/;
-    if (celular && !regexCelular.test(celular)) {
-      errores.celular = "El número de celular no parece válido, rectifique colocando algo como 3001234567";
-    }
-
     if (Object.keys(errores).length > 0) {
       throw new AppError("Error de validación", 400, errores);
     }
 
+    // Actualizamos solo los campos que existen en la tabla Usuario
     await usuario.update({
-      nombre: nombre ?? usuario.nombre,
-      apellido: apellido ?? usuario.apellido,
       email: email ?? usuario.email,
       password: passwordHash ?? usuario.password,
-      celular: celular ?? usuario.celular,
-      genero: genero ?? usuario.genero,
-      foto_perfil: foto_perfil ?? usuario.foto_perfil,
-    });
+      avatar: avatar ?? usuario.avatar,
+      activo: activo ?? usuario.activo,
+      rol: rol ?? usuario.rol
+    }, { transaction });
 
-    return usuario;
+    // Retornamos el usuario sin el password
+    const usuarioActualizado = usuario.toJSON();
+    delete usuarioActualizado.password;
+    
+    return usuarioActualizado;
   }
 
   // Eliminar usuario
@@ -135,6 +136,7 @@ class UsuarioService {
     if (!usuario) {
       throw new AppError("Usuario no encontrado", 404);
     }
+    // Al eliminar el usuario, la BD eliminará en cascada al Paciente o al Odontólogo asociado
     await usuario.destroy({ transaction });
     return true;
   }

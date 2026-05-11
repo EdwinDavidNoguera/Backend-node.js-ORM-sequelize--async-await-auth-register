@@ -1,5 +1,5 @@
 /**
- * Clase personalizada para manejar errores en la aplicación.
+ * Clase personalizada para manejar errores en la aplicación del servidor.
  * Extiende la clase Error nativa de JavaScript.
  * 
  * Propiedades:
@@ -12,12 +12,12 @@
  * Este error puede ser capturado en un middleware global para enviar respuestas uniformes al cliente.
  */
 class AppError extends Error {
-  constructor(message, statusCode = 500, errors = null) {
+  constructor(message, statusCode = 400, errors = null) {
     super(message);            // Llama al constructor de la clase padre (Error)
-    this.statusCode = statusCode; 
+    this.statusCode = statusCode; // 
     this.errors = errors;
 
-    // Mantener la pila de llamadas correcta (opcional, pero recomendable)
+    // Captura la pila de llamadas para este error, excluyendo el constructor de AppError)
     Error.captureStackTrace(this, this.constructor);
   }
 }

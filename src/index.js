@@ -7,7 +7,7 @@ import cors from 'cors'; // Para permitir peticiones entre dominios
 import { testConnection } from './app/models/indexModel.js'; // Función para probar conexión y sincronizar modelos 
 import rutas from './app/routes/indexRoutes.js'; // Rutas generales , tiene la rutas de toda la aplicación
 import citasCron from './app/automatizaciones/citasCron.js';// tareas automaticas relacionado a citas
-import { errorPersonalizado } from './app/utils/index.js'; // Middleware global de manejo de errores
+import {manejadorRespuestaError, manejadorErrorDB} from './app/utils/index.js'; // Middleware global de manejo de errores
 
 
 // Cargar variables de entorno desde el archivo .env
@@ -38,7 +38,8 @@ app.use(cors({
 app.use('/', rutas); // Rutas de pacientes, odontologos, etc pero sin el prefijo '/pacientes' en las rutas definidas
 
 // --- MIDDLEWARE GLOBAL DE ERRORES ---
-app.use(errorPersonalizado);
+app.use(manejadorRespuestaError); // 
+app.use(manejadorErrorDB); // Manejo específico de errores de la base de datos
 
 // --- INICIO DEL SERVIDOR ---
 

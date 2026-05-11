@@ -1,4 +1,4 @@
-import Usuario from '../models/usuariosModel.js';
+import Usuario from '../models/usuarioModel.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
@@ -13,7 +13,7 @@ const SECRET = 'mi_clave_secreta'; // En producción esta clave debe ir en un ar
 const login = async (req, res) => {
   const { email, password } = req.body;
 
-  console.log(" Datos recibidos en login:", { email, password }, "ATT: controlador Node.js");
+  //console.log(" Datos recibidos en login:", { email, password }, "ATT: controlador Node.js");
 
   try { 
     // Buscar usuario por email en la base de datos
@@ -21,8 +21,13 @@ const login = async (req, res) => {
 
     // Validación: si no existe el usuario o no tiene contraseña asociada
     if (!usuario || !usuario.password) { 
-      console.log(" Usuario no encontrado o sin password en DB ATT: controlador node.js");
+      //console.log(" Usuario no encontrado o sin password en DB )
       return res.status(401).json({ message: "Usuario o contraseña incorrectos" });
+    }
+
+    // 3. Verificar si el usuario está activo
+    if (!usuario.activo) {
+      return res.status(403).json({ message: "Esta cuenta está desactivada. Contacte al administrador." });
     }
 
     // Verificar contraseña: compara la ingresada con el hash almacenado
@@ -37,18 +42,27 @@ const login = async (req, res) => {
     // - id del usuario
     // - rol del usuario
     // - clave secreta definida
-    // - expiración de 1 hora
+    // - expiración de 3 horas
     const token = jwt.sign({ id: usuario.id, rol: usuario.rol }, process.env.JWT_SECRETA, {
-      expiresIn: '1h',
+      expiresIn: '3h',
     });
 
     // Respuesta exitosa con token y datos básicos del usuario
-    res.json({ message: "Login exitoso", token, id: usuario.id, rol: usuario.rol });
+    res.json({ 
+      message: "Login exitoso", 
+      token, 
+      user: {
+        id: usuario.id, 
+        rol: usuario.rol,
+        email: usuario.email,
+        avatar: usuario.avatar
+      }
+    });
 
   } catch (error) {
     // Manejo de errores: si ocurre algo inesperado en el proceso
     res.status(500).json({ message: "Error al iniciar sesión", error: error.message });
-    console.log(error);
+    console.log( "Error en login:", error);
   }
 };
 

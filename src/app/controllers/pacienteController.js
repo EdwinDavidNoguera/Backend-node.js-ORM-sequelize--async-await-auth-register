@@ -7,7 +7,7 @@ import { AppError, catchAsync, manejadorRespuestaExitosa } from "../utils/index.
  */
 class PacienteController {
 
-  // Crear un nuevo paciente
+  // metodo Crear un nuevo paciente
   crearPaciente = catchAsync(async (req, res) => {
     const nuevoPaciente = await PacienteService.crearPaciente(req.body);
         manejadorRespuestaExitosa(res,200, 'Paciente creado con exito', nuevoPaciente)
@@ -53,6 +53,8 @@ class PacienteController {
     });
   });
 }
+
+
 
 // Exportamos una instancia única del controlador
 export default new PacienteController();

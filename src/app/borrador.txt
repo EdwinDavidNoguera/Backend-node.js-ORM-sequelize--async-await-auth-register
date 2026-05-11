@@ -1,44 +1,51 @@
 
-//---------------------------------//
-//Admin
-//Node.js
-//pedro@gmail.com
-//admin123
-//
-//
-//paciente
-//Edwin@gmail.com
-//jJre8LwhT7
-//
-//odontologo
-//vale@gmail.com
-//vale123
+
+id
+email
+password
+rol
+activo
+avatar
+
+administrador@gmail.com
+ejemplo123
+ADMIN
+1
+default-avatar.png
+
+odontologo1@gclinica.com
+12345
+ODONTOLOGO
+1
+default-avatar.png
 
 
+odontologo2@gclinica.com
+1234545
+ODONTOLOGO
+1
+default-avatar.png
 
 
- if (rol === 'paciente') {
-        // El paciente puede ver todos sus historiales
-        const historiales = await Historial.findAll({
-          where: { pacienteId: req.usuario.id },
-          include: [{ model: Paciente, as: 'paciente' }]
-        });
-        if (!historiales || historiales.length === 0) {
-          return res.status(404).json({ error: `No se encontró historial para el paciente con ID ${req.usuario.id}.` });
-        }
+paciente1@gcorreo.com
+pacientekj123
+PACIENTE
+1
+default-avatar.png
 
 
-        if (rol === 'paciente') {
-        // Si el usuario es paciente, solo puede ver su propio historial
-        const historial = await Historial.findAll({
-          where: { pacienteId: req.usuario.id }, // Busca por el id del paciente en el token
-          include: [{ model: Paciente, as: 'paciente' }] // Incluye datos del paciente
-        });
-        if (!historial) {
-          // Si no existe historial, responde con error
-          return res.status(404).json({ error: `No se encontró historial para el paciente con ID ${req.usuario.id}.` });
-        }
+paciente2@gcorreo.com
+paciente1re23
+PACIENTE
+1
+default-avatar.png
 
+paciente3@gcorreo.c
+om
+pacientegff123
+PACIENTE
+1
+default-avatar.png
 
 
 

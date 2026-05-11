@@ -1,131 +1,48 @@
-// src/app/controllers/serviciosController.js
-import Servicio from "../models/serviciosModel.js";  // Importamos el modelo Servicio
+import ServicioService from "../services/servicioService.js";
+import enviarRespuestaExitosa from "../helpers/enviarRespuestaExitosa.js";
+import catchAsync from "../utils/errors/catchAsync.js"; 
 
-/**
- * Este controlador maneja las operaciones CRUD para los servicios ofrecidos por la clínica dental.
- * Incluye métodos para crear, leer, actualizar y eliminar servicios.
- * Se apoya del servicio para la lógica de negocio y validaciones.
- */
 class ServicioController {
 
-  // Obtener todos los servicios disponibles
-  async obtenerServicios(req, res) {
-    try {
-      const servicios = await Servicio.findAll();
-      res.json(servicios);
-    } catch (error) {
-      res.status(500).json({
-        message: "Error al obtener la lista de servicios",
-        error: error.message,
-      });
-    }
-  }
+  /**
+   * Crear servicio
+   */
+  static crear = catchAsync(async (req, res) => {
+    const servicio = await ServicioService.crear(req.body);
+    enviarRespuestaExitosa(res, 201, "Servicio creado correctamente", servicio);
+  });
 
-  // Obtener un servicio específico por su ID
-  async obtenerServicioPorId(req, res) {
-    const id = req.params.id;
-    try {
-      const servicio = await Servicio.findByPk(id);
-      
-      // Validar si el servicio existe
-      if (!servicio) {
-        return res.status(404).json({
-          message: `No se encontró ningún servicio con el ID ${id}`,
-        });
-      }
+  /**
+   * Obtener todos
+   */
+  static obtenerTodos = catchAsync(async (req, res) => {
+    const servicios = await ServicioService.obtenerTodos();
+    enviarRespuestaExitosa(res, 200, "Servicios obtenidos correctamente", servicios);
+  });
 
-      res.json(servicio);
-    } catch (error) {
-      res.status(500).json({
-        message: "Error al obtener el servicio",
-        error: error.message,
-      });
-    }
-  }
+  /**
+   * Obtener por ID
+   */
+  static obtenerPorId = catchAsync(async (req, res) => {
+    const servicio = await ServicioService.obtenerPorId(req.params.id);
+    enviarRespuestaExitosa(res, 200, "Servicio obtenido correctamente", servicio);
+  });
 
-  // Crear un nuevo servicio
-  async crearServicio(req, res) {
-    const { nombre, descripcion, precio, img } = req.body;
+  /**
+   * Actualizar
+   */
+  static actualizar = catchAsync(async (req, res) => {
+    const servicio = await ServicioService.actualizar(req.params.id, req.body);
+    enviarRespuestaExitosa(res, 200, "Servicio actualizado correctamente", servicio);
+  });
 
-    const errores = {};
-
-    // Validaciones mínimas
-    if (!nombre) errores.nombre = "El nombre es obligatorio";
-    if (!precio) errores.precio = "El precio es obligatorio";
-    
-    // Si existen errores de validación, devolverlos al cliente
-    if (Object.keys(errores).length > 0) {
-      return res.status(400).json({ errores });
-    }
-
-    try {
-      // Crear el nuevo registro en la base de datos
-      const nuevoServicio = await Servicio.create({
-        nombre,
-        descripcion,
-        precio,
-        img,
-      });
-
-      res.status(201).json({
-        message: "Servicio creado exitosamente",
-        servicio: nuevoServicio,
-      });
-    } catch (error) {
-      res.status(500).json({
-        message: "Error al crear el servicio",
-        error: error.message,
-      });
-    }
-  }
-
-  // Actualizar un servicio existente
-  async actualizarServicio(req, res) {
-    const id = req.params.id;
-    const { nombre, descripcion, precio, img } = req.body;
-
-    try {
-      const servicio = await Servicio.findByPk(id);
-
-      // Verificar que el servicio exista antes de actualizarlo
-      if (!servicio) {
-        return res.status(404).json({ message: "Servicio no encontrado" });
-      }
-
-      await servicio.update({ nombre, descripcion, precio, img });
-
-      res.json({ message: "Servicio actualizado correctamente", servicio });
-    } catch (error) {
-      res.status(500).json({
-        message: "Error al actualizar el servicio",
-        error: error.message,
-      });
-    }
-  }
-
-  // Eliminar un servicio
-  async eliminarServicio(req, res) {
-    const id = req.params.id;
-
-    try {
-      const servicio = await Servicio.findByPk(id);
-
-      // Verificar que el servicio exista antes de eliminarlo
-      if (!servicio) {
-        return res.status(404).json({ message: "Servicio no encontrado" });
-      }
-
-      await servicio.destroy();
-
-      res.json({ message: "Servicio eliminado correctamente" });
-    } catch (error) {
-      res.status(500).json({
-        message: "Error al eliminar el servicio",
-        error: error.message,
-      });
-    }
-  }
+  /**
+   * Eliminación lógica
+   */
+  static eliminar = catchAsync(async (req, res) => {
+    await ServicioService.eliminar(req.params.id);
+    enviarRespuestaExitosa(res, 200, "Servicio eliminado correctamente");
+  });
 }
 
-// Exportamos una instancia única del controlador
-export default new ServicioController();
+export default ServicioController;

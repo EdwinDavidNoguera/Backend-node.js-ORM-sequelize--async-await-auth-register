@@ -14,7 +14,7 @@ export {
   odontologoController,
   citasController,
   servicioController,
-  consultorioController,
+  consultorioController, 
   historialController,
   tratamientoController, 
   historialPDFController

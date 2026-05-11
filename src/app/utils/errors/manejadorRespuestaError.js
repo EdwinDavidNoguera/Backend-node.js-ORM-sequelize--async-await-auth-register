@@ -1,6 +1,5 @@
 // middlewares/errorMiddleware.js
 
-import e from "express";
 
 /**
  * Middleware global para el manejo de errores en Express.
@@ -12,18 +11,32 @@ import e from "express";
  * - El campo 'errors' puede contener detalles adicionales (por ejemplo, validaciones).
  * - El campo 'data' es null porque hubo un error.
  */
-const manejadorError = (err, req, res, next) => {
-  const status = err.statusCode || 500; // Usa el código de estado del error o 500 por defecto
-  const message = err.message || "Error interno del servidor"; // Mensaje del error o uno genérico
+// middlewares/errorGlobal.js
+const manejadorRespuestaError = (err, req, res, next) => {
+  
+  if (
+    err.name === "SequelizeValidationError" ||
+    err.name === "SequelizeUniqueConstraintError" ||
+    err.name === "SequelizeDatabaseError"
+  ) {
+    // Reenvía el error al manejador de DB
+    return next(err);
+  }
+
+  const status = err.statusCode || 500;
+  const message = err.message || "Error interno del servidor";
 
   res.status(status).json({
-    success: false ,               // Código de estado HTTP
-    message,               // Mensaje de error
-    data: null,            // No hay datos cuando ocurre un error
-    errors: err.errors || true // ni no hay errores envia true 
+    success: false,
+    message,
+    data: null,
+    errors: err.errors || true,
   });
 };
-export default manejadorError
+
+
+export default manejadorRespuestaError;
+
 
 /**
  * USO EN CONTROLADORES:

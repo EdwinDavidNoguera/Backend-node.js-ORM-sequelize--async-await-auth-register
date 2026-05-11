@@ -1,67 +1,52 @@
 import { DataTypes, Model } from "sequelize";
 import sequelize from "./db.js";
-import Odontologo from "./odontologosModel.js";
 
-// Definición del modelo HorarioOdontologo
-class HorarioOdontologo extends Model {
-  // Método de instancia: verificar si un horario está activo
-  estaDisponible() {
-    return this.disponible === true;
-  }
+/**
+ * Modelo HorarioOdontologo
+ * Representa los horarios de disponibilidad de cada odontólogo durante la semana.
+ * Tabla correspondiente en BD: `horario_odontologo`
+ */
+class HorarioOdontologo extends Model {}
 
-  // Método estático: buscar horarios por día
-  static async buscarPorDia(dia) {
-    return await this.findAll({ where: { dia_semana: dia } });
-  }
-}
-
-// Inicialización del modelo
 HorarioOdontologo.init(
   {
-    id: { 
-      type: DataTypes.INTEGER, 
-      primaryKey: true, 
-      autoIncrement: true 
+    // Clave primaria autoincremental
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
     },
 
-    odontologoId: { 
-      type: DataTypes.INTEGER, 
+    // FK hacia la tabla `odontologos` — un horario pertenece a un odontólogo
+    id_odontologo: {
+      type: DataTypes.INTEGER,
       allowNull: false,
-      references: {
-        model: Odontologo,
-        key: "id",
-      },
-
     },
 
-    dia_semana: { 
-      type: DataTypes.ENUM(
-        "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"
-      ), 
-      allowNull: false 
+    // Día de la semana usando ENUM igual al definido en SQL (valores en mayúsculas)
+    dia_semana: {
+      type: DataTypes.ENUM("LUNES", "MARTES", "MIERCOLES", "JUEVES", "VIERNES", "SABADO"),
+      allowNull: false,
     },
 
-    hora_inicio: { 
-      type: DataTypes.TIME, 
-      allowNull: false 
+    // Hora de inicio del turno (formato HH:MM:SS)
+    hora_inicio: {
+      type: DataTypes.TIME,
+      allowNull: false,
     },
 
-    hora_fin: { 
-      type: DataTypes.TIME, 
-      allowNull: false 
+    // Hora de finalización del turno (formato HH:MM:SS)
+    hora_fin: {
+      type: DataTypes.TIME,
+      allowNull: false,
     },
-
-    disponible: { 
-      type: DataTypes.BOOLEAN, 
-      defaultValue: true 
-    }
   },
   {
-    sequelize,                 // conexión a la BD
-    modelName: "HorarioOdontologo", 
-    tableName: "horarios_odontologos",
-    timestamps: true           // incluye createdAt y updatedAt
-  }
+    sequelize,                        // Instancia de conexión a la BD
+    modelName: "HorarioOdontologo",   // Nombre interno del modelo en Sequelize
+    tableName: "horario_odontologo",  // Nombre exacto de la tabla en la BD
+    timestamps: false,                // La tabla SQL no tiene createdAt ni updatedAt
+  }, 
 );
 
 export default HorarioOdontologo;

@@ -1,5 +1,5 @@
 import { Sequelize } from 'sequelize';
-import dbConfiguracion from '../../config/dbConfiguracion.js'; // Ajusta la ruta si está en otro lugar
+import dbConfiguracion from '../../config/dbConfiguracion.js'; // Importa la configuración de la base de datos desde el archivo de configuración
 
 // Configuración de la conexión a la base de datos usando Sequelize
 const sequelize = new Sequelize(
