@@ -8,14 +8,14 @@ const router = express.Router();
 
 // Rutas para /servicios
 router.route("/")
-  .get(verificarToken, verificarRol("admin", "odontologo", "paciente"),ServicioController.obtenerServicios) // Obtener todos los servicios
-  .post( verificarToken, verificarRol("admin"),ServicioController.crearServicio); // Crear un nuevo servicio
+  .get(verificarToken, verificarRol("ADMIN", "ODONTOLOGO", "PACIENTE"),ServicioController.obtenerTodosServicios) // Obtener todos los servicios
+  .post( verificarToken, verificarRol("ADMIN"),ServicioController.crearServivicio); // Crear un nuevo servicio
 
 // Rutas para servicios/:id
 router
   .route("/:id")
-  .get(verificarToken, verificarRol("admin", "odontologo", "paciente"), ServicioController.obtenerServicioPorId) // Obtener servicio por ID
-  .put(verificarToken, verificarRol("admin"), ServicioController.actualizarServicio) // Actualizar servicio por ID
-  .delete(verificarToken, verificarRol("admin"), ServicioController.eliminarServicio); // Eliminar servicio por ID
+  .get(verificarToken, verificarRol("ADMIN", "ODONTOLOGO", "PACIENTE"), ServicioController.obtenerServicioPorId) // Obtener servicio por ID
+  .put(verificarToken, verificarRol("ADMIN"), ServicioController.actualizarServicio) // Actualizar servicio por ID
+  .delete(verificarToken, verificarRol("ADMIN"), ServicioController.eliminarServicio); // Eliminar servicio por ID
 
 export default router;

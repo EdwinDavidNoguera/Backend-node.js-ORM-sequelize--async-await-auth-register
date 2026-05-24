@@ -1,4 +1,4 @@
-import Servicio from "../models/servicioModel.js";
+import Servicio from "../models/serviciosModel.js";
 import AppError from "../utils/errors/appError.js";
 
 class ServicioService {

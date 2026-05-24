@@ -1,45 +1,70 @@
-import UsuarioService from '../services/usuarioService.js';
-import { catchAsync } from '../utils/index.js'; // Ajusta esto si tu catchAsync está en otra ruta
-import enviarRespuestaExitosa from '../helpers/enviarRespuestaExitosa.js'; // Ajusta la ruta a tu helper
+import UsuarioService from "../services/usuarioService.js";
+import { catchAsync } from "../utils/index.js"; // Tu manejador asíncrono centralizado
+import enviarRespuestaExitosa from "../utils/errors/manajadorRespuestaExitosa.js";
 
-/**
- * Controlador para operaciones CRUD de usuarios.
- * Utiliza las utilidades catchAsync para manejar errores con el errorHandler personalizado.
- */
 class UsuarioController {
-
-  // Crear un nuevo usuario
+  /**
+   * Crear un nuevo usuario (Solo credenciales)
+   * POST /api/usuarios
+   */
   crearUsuario = catchAsync(async (req, res) => {
-    const nuevoUsuario = await UsuarioService.crearUsuario(req.body);
-    enviarRespuestaExitosa(res, 201, 'Usuario creado correctamente', nuevoUsuario);
+    const { email, password, rol, avatar } = req.body;
+
+    const nuevoUsuario = await UsuarioService.crearUsuario({
+      email,
+      password,
+      rol,
+      avatar,
+    });
+
+    // Ocultamos la contraseña en la respuesta final por seguridad
+    const respuestaSegura = nuevoUsuario.toJSON();
+    delete respuestaSegura.password;
+
+    enviarRespuestaExitosa(res, 201, "Usuario creado exitosamente", respuestaSegura);
   });
 
-  // Obtener todos los usuarios
+  /**
+   * Obtener todos los usuarios registrados
+   * GET /api/usuarios
+   */
   obtenerUsuarios = catchAsync(async (req, res) => {
     const usuarios = await UsuarioService.obtenerUsuarios();
-    enviarRespuestaExitosa(res, 200, 'Usuarios obtenidos con éxito', usuarios);
+    enviarRespuestaExitosa(res, 200, "Lista de usuarios obtenida", usuarios);
   });
 
-  // Obtener un usuario específico por su ID
-  obtenerUsuario = catchAsync(async (req, res) => {
-    // El AppError (404) ya lo lanza el servicio si no existe, 
-    // así que el controlador solo asume que si llegó aquí, todo salió bien.
-    const usuario = await UsuarioService.obtenerUsuarioPorId(req.params.id);
-    enviarRespuestaExitosa(res, 200, 'Usuario obtenido correctamente', usuario);
+  /**
+   * Obtener un usuario específico por su ID
+   * GET /api/usuarios/:id
+   */
+  obtenerUsuarioPorId = catchAsync(async (req, res) => {
+    const { id } = req.params;
+    const usuario = await UsuarioService.obtenerUsuarioPorId(id);
+    enviarRespuestaExitosa(res, 200, "Usuario encontrado con éxito", usuario);
   });
 
-  // Actualizar un usuario existente
+  /**
+   * Actualizar credenciales o estado del usuario
+   * PATCH /api/usuarios/:id
+   */
   actualizarUsuario = catchAsync(async (req, res) => {
-    const usuarioActualizado = await UsuarioService.actualizarUsuario(req.params.id, req.body);
-    enviarRespuestaExitosa(res, 200, 'Usuario actualizado con éxito', usuarioActualizado);
+    const { id } = req.params;
+    
+    // Pasamos el req.body directamente ya que el servicio filtra los campos permitidos
+    const usuarioActualizado = await UsuarioService.actualizarUsuario(id, req.body);
+    
+    enviarRespuestaExitosa(res, 200, "Usuario actualizado con éxito", usuarioActualizado);
   });
 
-  // Eliminar un usuario
+  /**
+   * Eliminar usuario (Desencadena borrado en cascada en la DB si aplica)
+   * DELETE /api/usuarios/:id
+   */
   eliminarUsuario = catchAsync(async (req, res) => {
-    await UsuarioService.eliminarUsuario(req.params.id);
-    enviarRespuestaExitosa(res, 200, 'Usuario eliminado correctamente');
+    const { id } = req.params;
+    await UsuarioService.eliminarUsuario(id);
+    enviarRespuestaExitosa(res, 200, "Usuario eliminado permanentemente");
   });
 }
 
-// Exportamos una instancia única del controlador
 export default new UsuarioController();

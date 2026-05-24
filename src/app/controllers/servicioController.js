@@ -1,48 +1,55 @@
-import ServicioService from "../services/servicioService.js";
-import enviarRespuestaExitosa from "../helpers/enviarRespuestaExitosa.js";
-import catchAsync from "../utils/errors/catchAsync.js"; 
+import ServicioService from "../services/servicioServices.js";
+import { catchAsync } from "../utils/index.js";
+import enviarRespuestaExitosa from "../utils/errors/manajadorRespuestaExitosa.js";
 
 class ServicioController {
-
   /**
-   * Crear servicio
+   * Registrar un nuevo servicio o tratamiento en el catálogo de la clínica
+   * POST /api/servicios
    */
-  static crear = catchAsync(async (req, res) => {
-    const servicio = await ServicioService.crear(req.body);
-    enviarRespuestaExitosa(res, 201, "Servicio creado correctamente", servicio);
+  crearServivicio = catchAsync(async (req, res) => {
+    const nuevoServicio = await ServicioService.crear(req.body);
+    enviarRespuestaExitosa(res, 201, "Servicio clínico registrado con éxito", nuevoServicio);
   });
 
   /**
-   * Obtener todos
+   * Obtener todos los servicios que se encuentran actualmente activos
+   * GET /api/servicios
    */
-  static obtenerTodos = catchAsync(async (req, res) => {
+  obtenerTodosServicios = catchAsync(async (req, res) => {
     const servicios = await ServicioService.obtenerTodos();
-    enviarRespuestaExitosa(res, 200, "Servicios obtenidos correctamente", servicios);
+    enviarRespuestaExitosa(res, 200, "Catálogo de servicios activos obtenido", servicios);
   });
 
   /**
-   * Obtener por ID
+   * Obtener los detalles de un servicio específico por su ID
+   * GET /api/servicios/:id
    */
-  static obtenerPorId = catchAsync(async (req, res) => {
-    const servicio = await ServicioService.obtenerPorId(req.params.id);
-    enviarRespuestaExitosa(res, 200, "Servicio obtenido correctamente", servicio);
+  obtenerServicioPorId = catchAsync(async (req, res) => {
+    const { id } = req.params;
+    const servicio = await ServicioService.obtenerPorId(id);
+    enviarRespuestaExitosa(res, 200, "Detalles del servicio obtenidos correctamente", servicio);
   });
 
   /**
-   * Actualizar
+   * Modificar atributos de un servicio (Costo, duración, descripción, etc.)
+   * PATCH /api/servicios/:id
    */
-  static actualizar = catchAsync(async (req, res) => {
-    const servicio = await ServicioService.actualizar(req.params.id, req.body);
-    enviarRespuestaExitosa(res, 200, "Servicio actualizado correctamente", servicio);
+  actualizarServicio = catchAsync(async (req, res) => {
+    const { id } = req.params;
+    const servicioActualizado = await ServicioService.actualizar(id, req.body);
+    enviarRespuestaExitosa(res, 200, "Servicio clínico actualizado correctamente", servicioActualizado);
   });
 
   /**
-   * Eliminación lógica
+   * Desactivar un servicio del catálogo (Eliminación lógica: activo = false)
+   * DELETE /api/servicios/:id
    */
-  static eliminar = catchAsync(async (req, res) => {
-    await ServicioService.eliminar(req.params.id);
-    enviarRespuestaExitosa(res, 200, "Servicio eliminado correctamente");
+  eliminarServicio = catchAsync(async (req, res) => {
+    const { id } = req.params;
+    await ServicioService.eliminar(id);
+    enviarRespuestaExitosa(res, 200, "El servicio ha sido desactivado y removido de la vista del público exitosamente");
   });
 }
 
-export default ServicioController;
+export default new ServicioController();

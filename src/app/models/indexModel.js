@@ -8,7 +8,7 @@ import Odontologo from './odontologoModel.js';
 import Consultorio from './consultorioModel.js';
 import Servicio from './serviciosModel.js';
 import Cita from './citaModel.js';
-import HistoriaOdontologica from './historiaOdontologicaModel.js';
+import HistoriaOdontologica from './historiaOdontologicoModel.js';
 import PerfilOdontologo from './perfilOdontologoModel.js';
 import HorarioOdontologo from './horarioOdontologoModel.js';
 

@@ -2,7 +2,7 @@ const dbConfiguracion = {
   HOST: 'localhost',         // Dirección del servidor de base de datos, en este caso es local
   USER: 'root',              // Usuario de la base de datos
   PASSWORD: '',              // Contraseña de ese usuario (modifícalo si usas una)
-  DB: 'dental_life_plus2', // El nombre exacto de la base de datos en MariaDB
+  DB: 'dental_life_plus2026', // El nombre exacto de la base de datos en MariaDB
   DIALECT: 'mysql',  
   pool: { //conjunto de conecciones para optimizar el rendimiento
     max: 5,          // Máximo número de conexiones en el pool

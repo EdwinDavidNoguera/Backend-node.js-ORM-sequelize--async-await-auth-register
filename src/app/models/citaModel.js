@@ -106,7 +106,7 @@ Cita.init(
     /**
      * La tabla tiene timestamps
      */
-    timestamps: true,
+    timestamps: false,
   }
 );
 

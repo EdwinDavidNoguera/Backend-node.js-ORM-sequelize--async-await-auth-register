@@ -6,7 +6,7 @@ import express from 'express'; // Framework de servidor
 import cors from 'cors'; // Para permitir peticiones entre dominios
 import { testConnection } from './app/models/indexModel.js'; // Función para probar conexión y sincronizar modelos 
 import rutas from './app/routes/indexRoutes.js'; // Rutas generales , tiene la rutas de toda la aplicación
-import citasCron from './app/automatizaciones/citasCron.js';// tareas automaticas relacionado a citas
+// import citasCron from './app/automatizaciones/citasCron.js';// tareas automaticas relacionado a citas
 import {manejadorRespuestaError, manejadorErrorDB} from './app/utils/index.js'; // Middleware global de manejo de errores
 
 
@@ -50,7 +50,7 @@ app.listen(PORT, () => {
   // Probar conexión y sincronizar modelos con la base de datos
   testConnection();
   // Tarea automatica para marcar las citas como ausentes
-  citasCron.iniciar();
+  // citasCron.iniciar();
 });
 
 // Exportamos app por si se necesita en tests u otros módulos

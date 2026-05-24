@@ -54,11 +54,15 @@ Paciente.init(
     
      // Número de celular
      
-    celular: {
+    celular: { // Se mantiene como string para preservar ceros iniciales y solo numeros
       type: DataTypes.STRING(10),
       allowNull: false,
       validate: {
         notEmpty: { msg: "El celular es obligatorio" },
+        is: {
+          args: /^\d{10}$/, // Solo dígitos, exactamente 10 caracteres
+          msg: "El celular debe tener exactamente 10 dígitos"
+        },
       },
     },
 

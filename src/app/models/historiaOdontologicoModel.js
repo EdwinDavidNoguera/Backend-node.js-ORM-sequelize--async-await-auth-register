@@ -85,7 +85,7 @@ HistoriaOdontologica.init(
     /**
      * La tabla tiene createdAt y updatedAt
      */
-    timestamps: true,
+    timestamps: false,
     createdAt: "fecha_registro",
     updatedAt: false // No se actualiza el registro después de creado
   }

@@ -1,60 +1,80 @@
-import PacienteService from "../services/pacientesServices.js";
-import { AppError, catchAsync, manejadorRespuestaExitosa } from "../utils/index.js";
+import PacienteService from "../services/pacienteServices.js";
+import { catchAsync } from "../utils/index.js";
+import enviarRespuestaExitosa from "../utils/errors/manajadorRespuestaExitosa.js";
 
-/**
- * Controlador para operaciones CRUD de pacientes.
- * Utiliza catchAsync para manejar errores automáticamente.
- */
 class PacienteController {
+  /**
+   * Registro completo de paciente (Crea cuenta de acceso + Perfil clínico)
+   * POST /api/pacientes/registro
+   */
+  registrarConUsuario = catchAsync(async (req, res) => {
+    const resultado = await PacienteService.registrarConUsuario(req.body);
+    
 
-  // metodo Crear un nuevo paciente
-  crearPaciente = catchAsync(async (req, res) => {
-    const nuevoPaciente = await PacienteService.crearPaciente(req.body);
-        manejadorRespuestaExitosa(res,200, 'Paciente creado con exito', nuevoPaciente)
+    enviarRespuestaExitosa(res, 201, "Paciente y cuenta registrados correctamente", resultado);
   });
 
-  // Obtener todos los pacientes
+  /**
+   * Flujo de agenda rápida para pacientes externos/de paso
+   * POST /api/pacientes/visitante
+   */
+  procesarVisitante = catchAsync(async (req, res) => {
+    const visitante = await PacienteService.procesarVisitante(req.body);
+    enviarRespuestaExitosa(res, 200, "Datos del visitante validados y procesados", visitante);
+  });
+
+  /**
+   * Obtener todos los pacientes (Incluye sus cuentas de usuario asociadas)
+   * GET /api/pacientes
+   */
   obtenerPacientes = catchAsync(async (req, res) => {
     const pacientes = await PacienteService.obtenerPacientes();
-    manejadorRespuestaExitosa(res,200, 'Pacientes consultados con exito', pacientes)
+    enviarRespuestaExitosa(res, 200, "Lista de pacientes obtenida", pacientes);
   });
 
-
-//Seguir poniendo el manejador
-
-
-
-
-  // Obtener un paciente específico por su ID
+  /**
+   * Obtener perfil completo de un paciente por ID
+   * GET /api/pacientes/:id
+   */
   obtenerPacientePorId = catchAsync(async (req, res) => {
-    const paciente = await PacienteService.obtenerPacientePorId(req.params.id);
-
-    if (!paciente) throw new AppError("Paciente no encontrado", 404);
-
-    res.status(200).json({ status: "success", data: paciente });
+    const { id } = req.params;
+    const paciente = await PacienteService.obtenerPacientePorId(id);
+    enviarRespuestaExitosa(res, 200, "Perfil de paciente encontrado", paciente);
   });
 
-  // Actualizar un paciente existente
+  /**
+   * Actualizar los datos del perfil clínico del paciente
+   * PATCH /api/pacientes/:id
+   */
   actualizarPaciente = catchAsync(async (req, res) => {
-    const pacienteActualizado = await PacienteService.actualizarPaciente(req.params.id, req.body);
-    res.status(200).json({
-      status: "success",
-      message: "Paciente actualizado correctamente",
-      data: pacienteActualizado
-    });
+    const { id } = req.params;
+    const resultado = await PacienteService.actualizarPaciente(id, req.body);
+    enviarRespuestaExitosa(res, 200, "Perfil de paciente actualizado correctamente", resultado);
   });
 
-  // Eliminar un paciente
+  /**
+   * Eliminar paciente de forma lógica o física con verificación de citas integradas
+   * DELETE /api/pacientes/:id
+   */
   eliminarPaciente = catchAsync(async (req, res) => {
-    await PacienteService.eliminarPaciente(req.params.id);
-    res.status(200).json({
-      status: "success",
-      message: "Paciente eliminado correctamente"
-    });
+    const { id } = req.params;
+    
+    // Captura si el frontend envía el query string explicitamente (?force=true)
+    const force = req.query.force === "true";
+
+    const resultado = await PacienteService.eliminarPaciente(id, force);
+
+    // Si el servicio detecta citas pendientes y no viene forzado, frena el flujo con un 200 preventivo
+    if (resultado.requiereConfirmacion) {
+      return enviarRespuestaExitosa(res, 200, resultado.message, {
+        requiereConfirmacion: true,
+        totalCitas: resultado.totalCitas,
+      });
+    }
+
+    // Si no había citas o vino forzado, confirma el borrado absoluto
+    enviarRespuestaExitosa(res, 200, "Paciente y credenciales asociados eliminados con éxito.");
   });
 }
 
-
-
-// Exportamos una instancia única del controlador
 export default new PacienteController();
