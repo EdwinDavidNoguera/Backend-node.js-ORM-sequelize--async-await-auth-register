@@ -81,7 +81,7 @@ class PacienteService {
    * FLUJO 1: REGISTRO COMPLETO (CON USUARIO)
    * ==========================================
    */
-  static async registrarConUsuario(datos) {
+  static async registrarPacienteConUsuario(datos) {
     const {
       nombre,
       apellido,
@@ -221,18 +221,18 @@ class PacienteService {
    */
   static async obtenerPacientes() {
     return await Paciente.findAll({
-      include: [
-        {
-          association: "usuario",
-          attributes: { exclude: ["password"] },
-        },
-      ],
+      // include: [
+      //   {
+      //     association: "usuario",
+      //     attributes: { exclude: ["password"] },
+      //   },
+      // ],
     });
   }
 
   static async obtenerPacientePorId(id) {
     const paciente = await Paciente.findByPk(id, {
-      include: ["usuario"],
+      // include: ["usuario"],
     });
 
     if (!paciente) throw new AppError("Paciente no encontrado", 404);

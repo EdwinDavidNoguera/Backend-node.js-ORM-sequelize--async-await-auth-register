@@ -7,7 +7,7 @@ class ServicioController {
    * Registrar un nuevo servicio o tratamiento en el catálogo de la clínica
    * POST /api/servicios
    */
-  crearServivicio = catchAsync(async (req, res) => {
+  crearServicio = catchAsync(async (req, res) => {
     const nuevoServicio = await ServicioService.crear(req.body);
     enviarRespuestaExitosa(res, 201, "Servicio clínico registrado con éxito", nuevoServicio);
   });
@@ -17,7 +17,7 @@ class ServicioController {
    * GET /api/servicios
    */
   obtenerTodosServicios = catchAsync(async (req, res) => {
-    const servicios = await ServicioService.obtenerTodos();
+    const servicios = await ServicioService.obtenerTodosServicios();
     enviarRespuestaExitosa(res, 200, "Catálogo de servicios activos obtenido", servicios);
   });
 
@@ -47,8 +47,8 @@ class ServicioController {
    */
   eliminarServicio = catchAsync(async (req, res) => {
     const { id } = req.params;
-    await ServicioService.eliminar(id);
-    enviarRespuestaExitosa(res, 200, "El servicio ha sido desactivado y removido de la vista del público exitosamente");
+    const servicio = await ServicioService.eliminar(id);
+    enviarRespuestaExitosa(res, 200, "El servicio ha sido desactivado y removido de la vista del público exitosamente", servicio);
   });
 }
 

@@ -66,28 +66,33 @@ Cita.init(
 
     /**
      * Hora de la cita
-     * Formato: HH:mm:ss
+     * Acepta formatos: "09:00" o "09:00:00"
      */
     hora: {
       type: DataTypes.TIME,
       allowNull: false,
       validate: {
-        isTime: { msg: "La hora debe tener el formato HH:mm:ss" },
+        is: {
+          args: [/^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$/],
+          msg: "La hora debe tener un formato válido (HH:mm o HH:mm:ss)",
+        },
       },
     },
 
     /**
-     * hora fin de la cita, necesaria para validar solapamientos de citas
-     * Formato: HH:mm:ss
+     * Hora fin de la cita, necesaria para validar solapamientos
+     * Acepta formatos: "09:45" o "09:45:00"
      */
     hora_fin: {
       type: DataTypes.TIME,
       allowNull: false,
       validate: {
-        isTime: { msg: "La hora de finalización debe tener el formato HH:mm:ss" },
-      }, 
+        is: {
+          args: [/^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$/],
+          msg: "La hora de finalización debe tener un formato válido (HH:mm o HH:mm:ss)",
+        },
+      },
     },
-
 
     /**
      * Estado de la cita
@@ -102,10 +107,6 @@ Cita.init(
     sequelize,
     modelName: "Cita",
     tableName: "cita",
-
-    /**
-     * La tabla tiene timestamps
-     */
     timestamps: false,
   }
 );

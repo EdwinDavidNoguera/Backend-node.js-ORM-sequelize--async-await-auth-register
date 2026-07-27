@@ -7,6 +7,10 @@ import odontologoRoutes from './odontologosRoutes.js';
 import usuarioRoutes from './usuariosRoutes.js';
 import authRoutes from './authRoutes.js';
 import servicioRoutes from './serviceRoutes.js';
+import horarioOdontologoRoutes from './horarioOdontologoRutes.js';
+import consultorioRoutes from './consultorioRoutes.js';
+import perfilRoutes from './perfilOdontologoRoutes.js';
+import citaRoutes from './citaRoutes.js';
 
 // Creamos una instancia del enrutador
 const router = Router();
@@ -16,7 +20,12 @@ router.use('/pacientes', pacienteRoutes);       // Rutas relacionadas con los pa
 router.use('/odontologos', odontologoRoutes);   // Rutas relacionadas con los odontólogos
 router.use('/usuarios', usuarioRoutes);         // Rutas relacionadas con los usuarios en general
 router.use('/servicios', servicioRoutes);       // Rutas relacionadas con los servicios
-router.use('/login', authRoutes);               // Ruta para autenticación (login)
+router.use('/login', authRoutes); 
+router.use('/horarioOdontologo', horarioOdontologoRoutes);
+router.use('/consultorio', consultorioRoutes);
+router.use('/perfil', perfilRoutes); 
+router.use('/citas', citaRoutes); 
+             // Ruta para autenticación (login)
 // Ruta principal (GET /)
 router.get('/', (req, res) => {
   res.send('Hola express desde rutas separadas 🚀, estas son las rutas generales');

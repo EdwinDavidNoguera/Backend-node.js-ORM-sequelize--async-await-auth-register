@@ -1,8 +1,12 @@
 const manejadorErrorEnDB = (err, req, res, next) => {
+  // 🟢 Si Express ya envió las cabeceras, delega el error para evitar duplicar respuesta
+  if (res.headersSent) {
+    return next(err);
+  }
+
   let status = 500;
   let message = "Error en la base de datos";
   let errors = {};
-  
 
   switch (err.name) {
     case "SequelizeValidationError":
@@ -46,11 +50,12 @@ const manejadorErrorEnDB = (err, req, res, next) => {
       errors = err.errors || {};
   }
 
-  res.status(status).json({
+  return res.status(status).json({
     success: false,
     message,
     data: null,
     errors,
   });
 };
+
 export default manejadorErrorEnDB;

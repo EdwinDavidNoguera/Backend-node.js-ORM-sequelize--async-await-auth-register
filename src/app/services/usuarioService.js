@@ -50,7 +50,7 @@ class UsuarioService {
     // 2. Verificar duplicados respetando la transacción
     const usuarioExistente = await Usuario.findOne({ where: { email: email.trim() }, transaction });
     if (usuarioExistente) {
-      // 🎯 Se envía estructurado en un objeto para que el frontend sepa qué input pintar de rojo
+      // Se envía estructurado en un objeto para que el frontend sepa qué input pintar de rojo
       throw new AppError("El correo ya está registrado", 409, { email: "El correo ya está registrado" });
     }
 
@@ -134,7 +134,7 @@ class UsuarioService {
       }
     }
 
-    // 🔥 Si se acumularon errores en la actualización, se lanzan todos juntos
+    // Si se acumularon errores en la actualización, se lanzan todos juntos
     if (Object.keys(errores).length > 0) {
       throw new AppError("Error de validación en la actualización", 400, errores);
     }

@@ -7,10 +7,8 @@ class PacienteController {
    * Registro completo de paciente (Crea cuenta de acceso + Perfil clínico)
    * POST /api/pacientes/registro
    */
-  registrarConUsuario = catchAsync(async (req, res) => {
+  registrarPacienteConUsuario = catchAsync(async (req, res) => {
     const resultado = await PacienteService.registrarConUsuario(req.body);
-    
-
     enviarRespuestaExitosa(res, 201, "Paciente y cuenta registrados correctamente", resultado);
   });
 

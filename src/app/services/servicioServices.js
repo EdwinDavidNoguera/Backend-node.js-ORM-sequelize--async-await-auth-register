@@ -140,7 +140,7 @@ class ServicioService {
    * =============================
    */
 
-  static async obtenerTodos() {
+  static async obtenerTodosServicios() {
 
     return await Servicio.findAll({
       where: {
@@ -257,8 +257,7 @@ class ServicioService {
     await servicio.update({
       activo: false
     });
-
-    return true;
+    return servicio;
   }
 }
 
