@@ -31,7 +31,7 @@
 //           }
 //         });
 
-//         // Actualizar cada cita encontrada a estado "ausente"
+//         // Actualizar cada cita encontrada a estado "CANCELADA"
 //         for (let cita of citasPendientes) {
 //           cita.estado = "ausente";
 //           await cita.save();

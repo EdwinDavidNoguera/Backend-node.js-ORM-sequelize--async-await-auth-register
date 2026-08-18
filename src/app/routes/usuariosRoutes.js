@@ -1,9 +1,23 @@
 import express from 'express';
 import verificarToken from '../middlewares/verificarToken.js';
 import verificarRol from '../middlewares/verificarRol.js';
-import {usuarioController} from '../controllers/indexController.js';
-import e from 'express';
+import { usuarioController } from '../controllers/indexController.js';
+
 const router = express.Router();
+
+// ==========================================
+// 🔐 RUTAS PÚBLICAS (No requieren autenticación)
+// ==========================================
+
+// Solicitar recuperación de contraseña (Genera token)
+router.post('/recuperar-password', usuarioController.solicitarRecuperacion);
+
+// Restablecer la contraseña usando el token
+router.post('/restablecer-password/:token', usuarioController.restablecerPassword);
+
+// ==========================================
+// 🔒 RUTAS PROTEGIDAS (Requieren token y rol ADMIN)
+// ==========================================
 
 // Rutas para /api/usuarios/
 router.route('/')

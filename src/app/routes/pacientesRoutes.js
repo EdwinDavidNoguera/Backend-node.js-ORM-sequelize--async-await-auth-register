@@ -21,8 +21,8 @@ router.post('/visitante', pacienteController.procesarVisitante);
 // 3. RUTAS PARAMETRIZADAS: /api/pacientes/:id
 // ==========================================
 router.route('/:id') 
-  .get(pacienteController.obtenerPacientePorId)  
-  .put(pacienteController.actualizarPaciente)    
-  .delete(pacienteController.eliminarPaciente);  
+  .get( verificarToken, verificarRol('ODONTOLOGO', 'ADMIN'), pacienteController.obtenerPacientePorId)  
+  .put( verificarToken, verificarRol('ODONTOLOGO', 'ADMIN'), pacienteController.actualizarPaciente)    
+  .delete( verificarToken, verificarRol('ODONTOLOGO', 'ADMIN'), pacienteController.eliminarPaciente);  
 
 export default router;

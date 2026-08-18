@@ -22,6 +22,8 @@ const app = express();
 
 //Este middleware se encarga de tomar el cuerpo de las solicitudes entrantes que tengan Content-Type: application/json y convertirlo en un objeto JavaScript accesible a través de req.body.
 app.use(express.json());
+// Permite acceder a las imágenes almacenadas en la carpeta uploads desde la ruta /uploads. Por ejemplo, una imagen almacenada en src/app/uploads/servicios/imagen.jpg será accesible desde http://localhost:3500/uploads/servicios/imagen.jpg
+app.use('/uploads', express.static('src/app/uploads'));
 
 // Definimos el puerto (usa 3306 solo si no hay conflicto con MySQL, de lo contrario usa 3000 o 4000)
 const PORT = process.env.PORT || 3500;

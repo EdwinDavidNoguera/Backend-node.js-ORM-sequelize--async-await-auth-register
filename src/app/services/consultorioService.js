@@ -49,7 +49,7 @@ class ConsultorioService {
   static async eliminarConsultorio(id) {
     const consultorio = await this.obtenerConsultorioPorId(id);
     
-    // Eliminación física (también podrías hacer un update a activo: 0 si prefieres borrado lógico)
+    // Eliminación física
     await consultorio.destroy();
     return true;
   }

@@ -5,14 +5,13 @@ import AppError from "../utils/errors/appError.js";
 
 class PacienteService {
   /**
-   * ==========================================
-   * VALIDACIÓN CENTRALIZADA Y ACUMULATIVA
-   * ==========================================
+   * Se encarga de validar los datos del formulario de paciente, ya sea para registro o actualización.
    */
   static validarFormularioPaciente(datos, opciones = {}) {
     const { requierePassword = false, esActualizacion = false } = opciones;
     const { nombre, apellido, celular, email, password, fecha_nacimiento } =
       datos;
+    // Objeto para acumular errores de validación
     const errores = {};
 
     // 1. Validaciones de presencia (Solo si no es una actualización parcial)
@@ -70,16 +69,14 @@ class PacienteService {
       }
     }
 
-    // 🔥 Si el objeto acumuló llaves, disparamos todos los errores al mismo tiempo
+    // Si el objeto acumuló  errores en el objeto errores, disparamos todos los errores al mismo tiempo
     if (Object.keys(errores).length > 0) {
       throw new AppError("Error de validación en el formulario", 400, errores);
     }
   }
 
   /**
-   * ==========================================
-   * FLUJO 1: REGISTRO COMPLETO (CON USUARIO)
-   * ==========================================
+   * Este método registra un paciente junto con su usuario asociado, asegurando que ambos se creen de manera atómica.
    */
   static async registrarPacienteConUsuario(datos) {
     const {
@@ -156,9 +153,8 @@ class PacienteService {
   }
 
   /**
-   * ==========================================
-   * FLUJO 2: VISITANTE (SIN USUARIO / SOLO HOME)
-   * ==========================================
+   * Se encarga de procesar la información de un visitante, 
+   * verificando si ya existe en la base de datos y actualizando o creando un registro según corresponda.
    */
   static async procesarVisitante(datos) {
     const { nombre, apellido, celular, genero, email } = datos;
@@ -181,7 +177,7 @@ class PacienteService {
     // 3. Si se encontró por cualquiera de las dos vías
     if (pacienteExistente) {
       if (pacienteExistente.id_usuario !== null) {
-        // 🎯 DETECTAR CUÁL FUE EL CAMPO DUPLICADO REAL
+        // Detectamos un conflicto: el paciente ya tiene una cuenta asociada
         const esConflictoEmail = pacienteExistente.email === email.trim();
         const campoCulpable = esConflictoEmail ? "email" : "celular";
         const mensajeDetallado = esConflictoEmail
@@ -191,7 +187,7 @@ class PacienteService {
         throw new AppError(
           "Este correo/celular pertenece a una cuenta registrada. Por favor, inicia sesión para agendar.",
           409,
-          { [campoCulpable]: mensajeDetallado }, // 🌟 Corregido: campoCulpable
+          { [campoCulpable]: mensajeDetallado }, // Corregido: campoCulpable
         );
       }
 
@@ -215,9 +211,8 @@ class PacienteService {
     });
   }
   /**
-   * ==========================================
-   * OBTENER TODOS / POR ID
-   * ==========================================
+   *Obtiene todos los pacientes registrados en la 
+   base de datos, incluyendo sus detalles asociados.
    */
   static async obtenerPacientes() {
     return await Paciente.findAll({
@@ -229,7 +224,7 @@ class PacienteService {
       // ],
     });
   }
-
+  
   static async obtenerPacientePorId(id) {
     const paciente = await Paciente.findByPk(id, {
       // include: ["usuario"],
@@ -240,9 +235,8 @@ class PacienteService {
   }
 
   /**
-   * ==========================================
-   * ACTUALIZAR PACIENTE
-   * ==========================================
+   * Actualiza la información de un paciente existente, 
+   * permitiendo cambios en sus datos personales y de contacto.
    */
   static async actualizarPaciente(id, datos) {
     const transaction = await sequelize.transaction();
@@ -277,9 +271,8 @@ class PacienteService {
   }
 
   /**
-   * ==========================================
-   * ELIMINAR PACIENTE
-   * ==========================================
+   * Elimina un paciente de la base de datos. Si el paciente tiene citas asociadas,
+   * se requiere una confirmación explícita para proceder con la eliminación.
    */
   static async eliminarPaciente(id, force = false) {
     const transaction = await sequelize.transaction();
@@ -301,7 +294,8 @@ class PacienteService {
       }
 
       await paciente.destroy({ transaction });
-
+      
+      // Si el paciente tiene un usuario asociado, también se elimina
       if (paciente.id_usuario) {
         await UsuarioService.eliminarUsuario(paciente.id_usuario, {
           transaction,

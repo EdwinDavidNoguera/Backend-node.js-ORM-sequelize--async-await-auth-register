@@ -1,79 +1,122 @@
 import Servicio from "../models/serviciosModel.js";
 import AppError from "../utils/errors/appError.js";
+import fs from "fs";
+import path from "path";
 
 class ServicioService {
 
   /**
-   * =============================
-   * VALIDACIONES PRIVADAS
-   * =============================
+   * Ruta física de la carpeta donde se almacenan las imágenes.
    */
+  static rutaUploads = path.resolve(
+    "src/app/uploads/servicios"
+  );
 
-  static validarCamposObligatorios(nombre, costo, duracion_minutos) {
+  /**
+   * Nombre de la imagen por defecto.
+   */
+  static imagenPorDefecto = "servicio-default.png";
+
+  /**
+   * Valida que los campos necesarios para un servicio
+   * hayan sido proporcionados.
+   */
+  static validarCamposObligatorios(
+    nombre,
+    costo,
+    duracion_minutos
+  ) {
 
     if (!nombre || nombre.trim() === "") {
+
       throw new AppError(
         "El nombre del servicio es obligatorio",
         400
       );
+
     }
 
     if (costo === undefined || costo === null) {
+
       throw new AppError(
         "El costo es obligatorio",
         400
       );
+
     }
 
     if (
       duracion_minutos === undefined ||
       duracion_minutos === null
     ) {
+
       throw new AppError(
         "La duración es obligatoria",
         400
       );
+
     }
+
   }
 
-  static validarValoresNumericos(costo, duracion_minutos) {
+  /**
+   * Valida que el costo y la duración
+   * tengan valores numéricos válidos.
+   */
+  static validarValoresNumericos(
+    costo,
+    duracion_minutos
+  ) {
 
     const costoNumero = Number(costo);
-    const duracionNumero = Number(duracion_minutos);
+
+    const duracionNumero =
+      Number(duracion_minutos);
 
     if (
       Number.isNaN(costoNumero) ||
       costoNumero < 0
     ) {
+
       throw new AppError(
         "El costo debe ser un número positivo",
         400
       );
+
     }
 
     if (
       Number.isNaN(duracionNumero) ||
       duracionNumero <= 0
     ) {
+
       throw new AppError(
         "La duración debe ser mayor a 0 minutos",
         400
       );
+
     }
+
   }
 
-  static async validarNombreDuplicado(nombre, id = null) {
+  /**
+   * Verifica que no exista otro servicio
+   * con el mismo nombre.
+   */
+  static async validarNombreDuplicado(
+    nombre,
+    id = null
+  ) {
 
-    const servicioExistente = await Servicio.findOne({
-      where: {
-        nombre: nombre.trim()
-      }
-    });
+    const servicioExistente =
+      await Servicio.findOne({
+        where: {
+          nombre: nombre.trim()
+        }
+      });
 
     if (!servicioExistente) return;
 
-    // Si estoy editando y el registro encontrado
-    // es el mismo, no lanzar error
     if (
       id &&
       Number(servicioExistente.id) === Number(id)
@@ -85,25 +128,116 @@ class ServicioService {
       `Ya existe un servicio llamado: ${nombre}`,
       409
     );
+
   }
 
   /**
-   * =============================
-   * CREAR SERVICIO
-   * =============================
+   * Comprueba si una imagen existe físicamente.
+   *
+   * Si no existe, devuelve la imagen por defecto.
+   *
+   * También normaliza la ruta de la imagen
+   * por defecto.
    */
+  static obtenerImagenValida(img) {
 
-  static async crear(datos) {
+    /*
+     * Si no hay imagen registrada,
+     * utilizar la imagen por defecto.
+     */
+    if (!img) {
+
+      return `/uploads/servicios/${this.imagenPorDefecto}`;
+
+    }
+
+    /*
+     * Extraer solamente el nombre del archivo.
+     */
+    const nombreArchivo =
+      path.basename(img);
+
+    /*
+     * Si es la imagen por defecto,
+     * devolver siempre la ruta completa.
+     */
+    if (
+      nombreArchivo ===
+      this.imagenPorDefecto
+    ) {
+
+      return `/uploads/servicios/${this.imagenPorDefecto}`;
+
+    }
+
+    /*
+     * Ruta física completa de la imagen.
+     */
+    const rutaImagen =
+      path.join(
+        this.rutaUploads,
+        nombreArchivo
+      );
+
+    /*
+     * Comprobar si realmente existe.
+     */
+    if (!fs.existsSync(rutaImagen)) {
+
+      console.log(
+        `Imagen no encontrada: ${rutaImagen}`
+      );
+
+      console.log(
+        `Se utilizará la imagen por defecto.`
+      );
+
+      return `/uploads/servicios/${this.imagenPorDefecto}`;
+
+    }
+
+    /*
+     * La imagen existe.
+     */
+    return `/uploads/servicios/${nombreArchivo}`;
+
+  }
+
+  /**
+   * Verifica la imagen de un servicio
+   * antes de devolverlo.
+   */
+  static validarImagenServicio(servicio) {
+
+    if (!servicio) return servicio;
+
+    const imagenValida =
+      this.obtenerImagenValida(
+        servicio.img
+      );
+
+    /*
+     * Modificamos únicamente la respuesta
+     * que se devolverá.
+     */
+    servicio.img = imagenValida;
+
+    return servicio;
+
+  }
+
+  /**
+   * Crea un nuevo servicio odontológico.
+   */
+  static async crear(datos, archivo) {
 
     const {
       nombre,
       costo,
       duracion_minutos,
-      descripcion,
-      img
+      descripcion
     } = datos;
 
-    // Validaciones
     this.validarCamposObligatorios(
       nombre,
       costo,
@@ -115,90 +249,148 @@ class ServicioService {
       duracion_minutos
     );
 
-    await this.validarNombreDuplicado(nombre);
+    await this.validarNombreDuplicado(
+      nombre
+    );
 
-    // Crear servicio
-    return await Servicio.create({
+    const servicio =
+      await Servicio.create({
 
-      nombre: nombre.trim(),
+        nombre: nombre.trim(),
 
-      costo: Number(costo),
+        costo: Number(costo),
 
-      duracion_minutos: Number(duracion_minutos),
+        duracion_minutos:
+          Number(duracion_minutos),
 
-      descripcion: descripcion || null,
+        descripcion:
+          descripcion || null,
 
-      activo: true,
+        activo: true,
 
-      ...(img && { img })
-    });
+        /*
+         * Si se proporciona una imagen,
+         * guardar su ruta.
+         *
+         * Si no se proporciona,
+         * el modelo puede utilizar
+         * la imagen por defecto.
+         */
+        ...(archivo && {
+          img:
+            `/uploads/servicios/${archivo.filename}`
+        })
+
+      });
+
+    /*
+     * Verificar que la imagen registrada
+     * realmente exista.
+     */
+    return this.validarImagenServicio(
+      servicio
+    );
+
   }
 
   /**
-   * =============================
-   * OBTENER TODOS
-   * =============================
+   * Obtiene todos los servicios activos.
+   *
+   * Si alguna imagen fue eliminada físicamente,
+   * se utilizará automáticamente la imagen
+   * por defecto.
    */
-
   static async obtenerTodosServicios() {
 
-    return await Servicio.findAll({
-      where: {
-        activo: true
-      }
-    });
+    const servicios =
+      await Servicio.findAll({
+        where: {
+          activo: true
+        }
+      });
+
+    return servicios.map(
+      servicio =>
+        this.validarImagenServicio(servicio)
+    );
+
   }
 
   /**
-   * =============================
-   * OBTENER POR ID
-   * =============================
+   * Obtiene un servicio mediante
+   * su identificador.
    */
-
   static async obtenerPorId(id) {
 
-    const servicio = await Servicio.findByPk(id);
+    const servicio =
+      await Servicio.findByPk(id);
 
     if (!servicio) {
+
       throw new AppError(
         "Servicio no encontrado",
         404
       );
+
     }
 
-    return servicio;
+    return this.validarImagenServicio(
+      servicio
+    );
+
   }
 
   /**
-   * =============================
-   * ACTUALIZAR SERVICIO
-   * =============================
+   * Actualiza un servicio.
+   *
+   * Si se carga una nueva imagen:
+   *
+   * 1. Multer guarda la nueva imagen.
+   * 2. Se actualiza la ruta en SQL.
+   * 3. Se elimina físicamente la imagen anterior.
    */
+  static async actualizar(
+    id,
+    datos,
+    archivo
+  ) {
 
-  static async actualizar(id, datos) {
+    const servicio =
+      await Servicio.findByPk(id);
 
-    const servicio = await this.obtenerPorId(id);
+    if (!servicio) {
+
+      throw new AppError(
+        "Servicio no encontrado",
+        404
+      );
+
+    }
 
     const {
       nombre,
       costo,
       duracion_minutos,
       descripcion,
-      img,
       activo
     } = datos;
 
-    // Validar duplicados
     if (nombre) {
-      await this.validarNombreDuplicado(nombre, id);
+
+      await this.validarNombreDuplicado(
+        nombre,
+        id
+      );
+
     }
 
-    // Validaciones numéricas
     if (
       costo !== undefined ||
       duracion_minutos !== undefined
     ) {
+
       this.validarValoresNumericos(
+
         costo !== undefined
           ? costo
           : servicio.costo,
@@ -206,11 +398,30 @@ class ServicioService {
         duracion_minutos !== undefined
           ? duracion_minutos
           : servicio.duracion_minutos
+
       );
+
     }
 
-    // Actualizar
-    return await servicio.update({
+    /*
+     * Guardamos la imagen anterior
+     * antes de actualizar.
+     */
+    const imagenAnterior =
+      servicio.img;
+
+    /*
+     * Construimos la nueva imagen.
+     */
+    const nuevaImagen =
+      archivo
+        ? `/uploads/servicios/${archivo.filename}`
+        : servicio.img;
+
+    /*
+     * Actualizamos el servicio.
+     */
+    await servicio.update({
 
       nombre:
         nombre !== undefined
@@ -232,33 +443,149 @@ class ServicioService {
           ? descripcion
           : servicio.descripcion,
 
-      img:
-        img !== undefined
-          ? img
-          : servicio.img,
+      img: nuevaImagen,
 
       activo:
         activo !== undefined
           ? activo
           : servicio.activo
+
     });
+
+    /*
+     * Si se cargó una nueva imagen,
+     * eliminamos físicamente la anterior.
+     */
+    if (
+      archivo &&
+      imagenAnterior
+    ) {
+
+      const nombreImagenAnterior =
+        path.basename(
+          imagenAnterior
+        );
+
+      /*
+       * Nunca eliminar la imagen por defecto.
+       */
+      if (
+        nombreImagenAnterior !==
+        this.imagenPorDefecto
+      ) {
+
+        const rutaImagenAnterior =
+          path.join(
+            this.rutaUploads,
+            nombreImagenAnterior
+          );
+
+        if (
+          fs.existsSync(
+            rutaImagenAnterior
+          )
+        ) {
+
+          fs.unlinkSync(
+            rutaImagenAnterior
+          );
+
+          console.log(
+            `Imagen anterior eliminada: ${rutaImagenAnterior}`
+          );
+
+        }
+
+      }
+
+    }
+
+    return this.validarImagenServicio(
+      servicio
+    );
+
   }
 
   /**
-   * =============================
-   * ELIMINACIÓN LÓGICA
-   * =============================
+   * Elimina completamente un servicio.
+   *
+   * También elimina físicamente su imagen,
+   * excepto si utiliza la imagen por defecto.
    */
-
   static async eliminar(id) {
 
-    const servicio = await this.obtenerPorId(id);
+    const servicio =
+      await Servicio.findByPk(id);
 
-    await servicio.update({
-      activo: false
-    });
+    if (!servicio) {
+
+      throw new AppError(
+        "Servicio no encontrado",
+        404
+      );
+
+    }
+
+    /*
+     * Guardamos la imagen antes de eliminar
+     * el registro de la base de datos.
+     */
+    const imagen =
+      servicio.img;
+
+    /*
+     * Eliminar el registro de SQL.
+     */
+    await servicio.destroy();
+
+    /*
+     * Obtener solamente el nombre del archivo.
+     */
+    if (imagen) {
+
+      const nombreImagen =
+        path.basename(imagen);
+
+      /*
+       * Nunca eliminar la imagen por defecto.
+       */
+      if (
+        nombreImagen !==
+        this.imagenPorDefecto
+      ) {
+
+        const rutaImagen =
+          path.join(
+            this.rutaUploads,
+            nombreImagen
+          );
+
+        /*
+         * Si el archivo existe,
+         * eliminarlo físicamente.
+         */
+        if (
+          fs.existsSync(rutaImagen)
+        ) {
+
+          fs.unlinkSync(
+            rutaImagen
+          );
+
+          console.log(
+            `Imagen del servicio eliminada: ${rutaImagen}`
+          );
+
+        }
+
+      }
+
+    }
+
     return servicio;
+
   }
+
 }
 
 export default ServicioService;

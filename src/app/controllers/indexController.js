@@ -7,7 +7,6 @@ import odontologoController from './odontologoController.js';
 import servicioController from './servicioController.js';
 import citaController from './citaController.js';
 import historialController from './historialController.js';
-import perfilController from './perfilOdontologoController.js';
 import horarioOdontologoController from './horarioOdontologoController.js';
 import consultorioController from './consultorioController.js';
 
@@ -19,7 +18,6 @@ export {
   servicioController,
   citaController,
   historialController,
-  perfilController,
   horarioOdontologoController,
   consultorioController,
   

@@ -1,6 +1,7 @@
 import UsuarioService from "../services/usuarioService.js";
 import { catchAsync } from "../utils/index.js"; // Tu manejador asíncrono centralizado
 import enviarRespuestaExitosa from "../utils/errors/manajadorRespuestaExitosa.js";
+import AppError from "../utils/errors/appError.js"; // Importamos AppError por si falta algún dato en el body
 
 class UsuarioController {
   /**
@@ -64,6 +65,45 @@ class UsuarioController {
     const { id } = req.params;
     await UsuarioService.eliminarUsuario(id);
     enviarRespuestaExitosa(res, 200, "Usuario eliminado permanentemente");
+  });
+
+  // ==========================================
+  // 🔐 FLUJO DE RECUPERACIÓN DE CONTRASEÑA
+  // ==========================================
+
+  /**
+   * Solicitar recuperación de contraseña (Genera token)
+   * POST /api/usuarios/recuperar-password
+   */
+  solicitarRecuperacion = catchAsync(async (req, res) => {
+    const { email } = req.body;
+
+    if (!email) {
+      throw new AppError("El correo es obligatorio", 400);
+    }
+
+    const resultado = await UsuarioService.solicitarRecuperacion(email);
+    
+    // Pasamos el "resultado" que temporalmente contiene el token para poder probar en Postman
+    enviarRespuestaExitosa(res, 200, "Instrucciones de recuperación generadas correctamente", resultado);
+  });
+
+  /**
+   * Restablecer la contraseña con un token válido
+   * POST /api/usuarios/restablecer-password/:token
+   */
+  restablecerPassword = catchAsync(async (req, res) => {
+    const { token } = req.params;
+    const { nuevaPassword } = req.body;
+
+    if (!nuevaPassword) {
+      throw new AppError("La nueva contraseña es obligatoria", 400);
+    }
+
+    await UsuarioService.restablecerPassword(token, nuevaPassword);
+    
+    // Como no devolvemos data, omitimos el cuarto parámetro
+    enviarRespuestaExitosa(res, 200, "La contraseña ha sido actualizada exitosamente");
   });
 }
 

@@ -1,6 +1,11 @@
 import { HorarioOdontologo, Odontologo } from "../models/indexModel.js";
 import AppError from "../utils/errors/appError.js";
 
+/**
+ * Esta clase proporciona métodos para gestionar los horarios de los odontólogos.
+ * Incluye funcionalidades para crear, obtener y eliminar bloques de horario.
+ */
+
 class HorarioOdontologoService {
   static async crearHorario(data, transaction = null) {
     const { id_odontologo, dia_semana, hora_inicio, hora_fin } = data;

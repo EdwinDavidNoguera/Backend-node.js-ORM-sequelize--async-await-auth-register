@@ -3,53 +3,93 @@ import { catchAsync } from "../utils/index.js";
 import enviarRespuestaExitosa from "../utils/errors/manajadorRespuestaExitosa.js";
 
 class ServicioController {
+
   /**
-   * Registrar un nuevo servicio o tratamiento en el catálogo de la clínica
+   * Registra un nuevo servicio o tratamiento en el catálogo de la clínica.
    * POST /api/servicios
+   * Utiliza Multer para recibir opcionalmente una imagen mediante req.file.
    */
   crearServicio = catchAsync(async (req, res) => {
-    const nuevoServicio = await ServicioService.crear(req.body);
-    enviarRespuestaExitosa(res, 201, "Servicio clínico registrado con éxito", nuevoServicio);
+    const nuevoServicio = await ServicioService.crear(req.body, req.file);
+
+    enviarRespuestaExitosa(
+      res,
+      201,
+      "Servicio clínico registrado con éxito",
+      nuevoServicio
+    );
   });
 
   /**
-   * Obtener todos los servicios que se encuentran actualmente activos
+   * Obtiene todos los servicios que se encuentran activos.
    * GET /api/servicios
    */
   obtenerTodosServicios = catchAsync(async (req, res) => {
     const servicios = await ServicioService.obtenerTodosServicios();
-    enviarRespuestaExitosa(res, 200, "Catálogo de servicios activos obtenido", servicios);
+
+    enviarRespuestaExitosa(
+      res,
+      200,
+      "Catálogo de servicios activos obtenido",
+      servicios
+    );
   });
 
   /**
-   * Obtener los detalles de un servicio específico por su ID
+   * Obtiene la información de un servicio específico mediante su ID.
    * GET /api/servicios/:id
    */
   obtenerServicioPorId = catchAsync(async (req, res) => {
     const { id } = req.params;
     const servicio = await ServicioService.obtenerPorId(id);
-    enviarRespuestaExitosa(res, 200, "Detalles del servicio obtenidos correctamente", servicio);
+
+    enviarRespuestaExitosa(
+      res,
+      200,
+      "Detalles del servicio obtenidos correctamente",
+      servicio
+    );
   });
 
   /**
-   * Modificar atributos de un servicio (Costo, duración, descripción, etc.)
-   * PATCH /api/servicios/:id
+   * Actualiza la información de un servicio existente.
+   * Permite modificar datos como el costo, duración, descripción e imagen.
+   * PUT /api/servicios/:id
    */
   actualizarServicio = catchAsync(async (req, res) => {
     const { id } = req.params;
-    const servicioActualizado = await ServicioService.actualizar(id, req.body);
-    enviarRespuestaExitosa(res, 200, "Servicio clínico actualizado correctamente", servicioActualizado);
+
+    const servicioActualizado = await ServicioService.actualizar(
+      id,
+      req.body,
+      req.file
+    );
+
+    enviarRespuestaExitosa(
+      res,
+      200,
+      "Servicio clínico actualizado correctamente",
+      servicioActualizado
+    );
   });
 
   /**
-   * Desactivar un servicio del catálogo (Eliminación lógica: activo = false)
+   * Desactiva un servicio mediante una eliminación lógica.
+   * El servicio se conserva en la base de datos, pero deja de estar activo.
    * DELETE /api/servicios/:id
    */
   eliminarServicio = catchAsync(async (req, res) => {
     const { id } = req.params;
     const servicio = await ServicioService.eliminar(id);
-    enviarRespuestaExitosa(res, 200, "El servicio ha sido desactivado y removido de la vista del público exitosamente", servicio);
+
+    enviarRespuestaExitosa(
+      res,
+      200,
+      "El servicio ha sido eliminado exitosamente",
+      servicio
+    );
   });
 }
 
 export default new ServicioController();
+

@@ -6,13 +6,13 @@ import sequelize from "./db.js";
 
 /**
  * Modelo Usuario
- * 
+ *
  * Este modelo representa la tabla `usuario` en la base de datos.
- * Su responsabilidad es únicamente manejar autenticación y acceso:
- * - login
+ * Su responsabilidad es manejar:
+ * - autenticación
+ * - recuperación de contraseña
  * - roles
  * - estado del usuario
- * 
  */
 class Usuario extends Model {}
 
@@ -47,7 +47,7 @@ Usuario.init(
 
     /**
      * Contraseña del usuario
-     * Debe almacenarse encriptada (bcrypt en el service)
+     * Se almacena encriptada mediante bcrypt.
      */
     password: {
       type: DataTypes.STRING(255),
@@ -55,8 +55,27 @@ Usuario.init(
     },
 
     /**
+     * Token temporal utilizado para recuperar la contraseña.
+     *
+     * Cuando el usuario solicita recuperar su contraseña,
+     * se genera un token aleatorio y se almacena aquí.
+     */
+    reset_password_token: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+
+    /**
+     * Fecha y hora en la que deja de ser válido
+     * el token de recuperación.
+     */
+    reset_password_expires: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+
+    /**
      * Rol del usuario dentro del sistema
-     * Solo puede ser uno de los definidos en la BD
      */
     rol: {
       type: DataTypes.ENUM("ADMIN", "PACIENTE", "ODONTOLOGO"),
@@ -75,8 +94,6 @@ Usuario.init(
 
     /**
      * Avatar del usuario
-     * - Puede ser una URL o nombre de archivo
-     * - Tiene un valor por defecto definido en la BD
      */
     avatar: {
       type: DataTypes.STRING(255),
@@ -84,18 +101,12 @@ Usuario.init(
     },
   },
   {
-    /**
-     * Configuración del modelo
-     */
-
-    sequelize,                  // Conexión a la base de datos
-    modelName: "Usuario",       // Nombre interno del modelo
-    tableName: "usuario",       // Nombre real de la tabla en la BD
-
-    
+    sequelize,
+    modelName: "Usuario",
+    tableName: "usuario",
     timestamps: false,
   }
 );
 
-// Exportamos el modelo para usarlo en otras capas (services, controllers, etc.)
+// Exportamos el modelo
 export default Usuario;

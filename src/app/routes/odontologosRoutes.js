@@ -1,18 +1,61 @@
-import express from 'express';
-import {odontologoController} from '../controllers/indexController.js'; // Importa el controlador directamente desde odontólogoController.js
+import express from "express";
+import { odontologoController } from "../controllers/indexController.js";
+
+import verificarRol from "../middlewares/verificarRol.js";
+import verificarToken from "../middlewares/verificarToken.js";
+
+import uploadPerfilOdontologo from "../middlewares/uploadPerfilOdontologo.js";
+
 const router = express.Router();
-import verificarRol from '../middlewares/verificarRol.js';
-import verificarToken from '../middlewares/verificarToken.js';
 
-// Rutas para /api/odontologos/
-router.route('/')
-  .get(odontologoController.obtenerOdontologos)   // Obtener todos los odontólogos
-  .post(verificarToken, verificarRol("admin"), odontologoController.crearOdontologo);    // Crear un nuevo odontólogo
+// ==========================================
+// RUTAS PARA /odontologos
+// ==========================================
 
-// Rutas para /api/odontologos/:id
-router.route('/:id')
-  .get(odontologoController.obtenerOdontologoPorId)  // Obtener odontólogo por ID
-  .put(verificarToken, verificarRol("admin","odontologo"),odontologoController.actualizarOdontologo)    // Actualizar odontólogo por ID
-  .delete(verificarToken, verificarRol("admin"),odontologoController.eliminarOdontologo);  // Eliminar odontólogo por ID
+router.route("/")
+
+  // Obtener todos los odontólogos
+  .get(
+    odontologoController.obtenerOdontologos
+  )
+
+  // Crear un nuevo odontólogo
+  //
+  // uploadPerfilOdontologo.single("img")
+  // recibe una sola imagen desde el campo "img"
+  .post(
+    verificarToken,
+    verificarRol("ADMIN"),
+    uploadPerfilOdontologo.single("img"),
+    odontologoController.crearOdontologo
+  );
+
+
+// ==========================================
+// RUTAS PARA /odontologos/:id
+// ==========================================
+
+router.route("/:id")
+
+  // Obtener odontólogo por ID
+  .get(
+    odontologoController.obtenerOdontologoPorId
+  )
+
+  // Actualizar odontólogo por ID
+  .put(
+    verificarToken,
+    verificarRol("ADMIN", "ODONTOLOGO"),
+    uploadPerfilOdontologo.single("img"),
+    odontologoController.actualizarOdontologo
+  )
+
+  // Eliminar odontólogo por ID
+  .delete(
+    verificarToken,
+    verificarRol("ADMIN"),
+    odontologoController.eliminarOdontologo
+  );
+
 
 export default router;
