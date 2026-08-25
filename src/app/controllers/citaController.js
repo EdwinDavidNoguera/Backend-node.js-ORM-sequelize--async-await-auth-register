@@ -2,9 +2,56 @@ import catchAsync from "../utils/errors/catchAsync.js";
 import enviarRespuestaExitosa from "../utils/errors/manajadorRespuestaExitosa.js";
 import CitaService from "../services/citaService.js";
 
-
 class CitaController {
+  // =========================================================
+  // OBTENER DISPONIBILIDAD
+  // =========================================================
 
+  static obtenerDisponibilidad = catchAsync(
+    async (req, res) => {
+      const {
+        id_servicio,
+        fecha,
+        id_odontologo,
+      } = req.query;
+
+      const disponibilidad =
+        await CitaService.obtenerDisponibilidad(
+          id_servicio,
+          fecha,
+          id_odontologo
+        );
+
+      enviarRespuestaExitosa(
+        res,
+        200,
+        "Disponibilidad obtenida con éxito",
+        disponibilidad
+      );
+    }
+  );
+
+  // =========================================================
+  // VERIFICAR EMAIL
+  // =========================================================
+
+  static verificarEmail = catchAsync(
+    async (req, res) => {
+      const { email } = req.query;
+
+      const resultado =
+        await CitaService.verificarEmailExistente(
+          email
+        );
+
+      enviarRespuestaExitosa(
+        res,
+        200,
+        "Correo verificado correctamente",
+        resultado
+      );
+    }
+  );
 
   // =========================================================
   // CREAR CITA
@@ -12,13 +59,11 @@ class CitaController {
 
   static crearCita = catchAsync(
     async (req, res) => {
-
       const nuevaCita =
         await CitaService.crearCita(
           req.body,
           req.usuario
         );
-
 
       enviarRespuestaExitosa(
         res,
@@ -26,10 +71,8 @@ class CitaController {
         "Cita creada correctamente",
         nuevaCita
       );
-
     }
   );
-
 
   // =========================================================
   // OBTENER TODAS LAS CITAS
@@ -37,12 +80,10 @@ class CitaController {
 
   static obtenerCitas = catchAsync(
     async (req, res) => {
-
       const citas =
         await CitaService.obtenerCitas(
           req.query
         );
-
 
       enviarRespuestaExitosa(
         res,
@@ -50,10 +91,8 @@ class CitaController {
         "Listado de citas obtenido con éxito",
         citas
       );
-
     }
   );
-
 
   // =========================================================
   // OBTENER CITA POR ID
@@ -61,13 +100,11 @@ class CitaController {
 
   static obtenerCitaPorId = catchAsync(
     async (req, res) => {
-
       const cita =
         await CitaService.obtenerCitaPorId(
           req.params.id,
           req.usuario
         );
-
 
       enviarRespuestaExitosa(
         res,
@@ -75,133 +112,93 @@ class CitaController {
         "Cita encontrada con éxito",
         cita
       );
-
     }
   );
-
 
   // =========================================================
   // OBTENER CITAS POR ODONTÓLOGO
   // =========================================================
 
   static obtenerCitasPorOdontologo =
-    catchAsync(
-      async (req, res) => {
-
-        const citas =
-          await CitaService.obtenerCitasPorOdontologo(
-
-            req.params.id_odontologo,
-
-            req.query,
-
-            req.usuario
-
-          );
-
-
-        enviarRespuestaExitosa(
-          res,
-          200,
-          "Citas del odontólogo obtenidas con éxito",
-          citas
+    catchAsync(async (req, res) => {
+      const citas =
+        await CitaService.obtenerCitasPorOdontologo(
+          req.params.id_odontologo,
+          req.query,
+          req.usuario
         );
 
-      }
-    );
-
+      enviarRespuestaExitosa(
+        res,
+        200,
+        "Citas del odontólogo obtenidas con éxito",
+        citas
+      );
+    });
 
   // =========================================================
   // OBTENER CITAS POR PACIENTE
   // =========================================================
 
   static obtenerCitasPorPaciente =
-    catchAsync(
-      async (req, res) => {
-
-        const citas =
-          await CitaService.obtenerCitasPorPaciente(
-
-            req.params.id_paciente,
-
-            req.query,
-
-            req.usuario
-
-          );
-
-
-        enviarRespuestaExitosa(
-          res,
-          200,
-          "Citas del paciente obtenidas con éxito",
-          citas
+    catchAsync(async (req, res) => {
+      const citas =
+        await CitaService.obtenerCitasPorPaciente(
+          req.params.id_paciente,
+          req.query,
+          req.usuario
         );
 
-      }
-    );
-
+      enviarRespuestaExitosa(
+        res,
+        200,
+        "Citas del paciente obtenidas con éxito",
+        citas
+      );
+    });
 
   // =========================================================
   // ACTUALIZAR CITA
   // =========================================================
 
-  static actualizarCita =
-    catchAsync(
-      async (req, res) => {
-
-        const citaActualizada =
-          await CitaService.actualizarCita(
-
-            req.params.id,
-
-            req.body,
-
-            req.usuario
-
-          );
-
-
-        enviarRespuestaExitosa(
-          res,
-          200,
-          "Cita actualizada correctamente",
-          citaActualizada
+  static actualizarCita = catchAsync(
+    async (req, res) => {
+      const citaActualizada =
+        await CitaService.actualizarCita(
+          req.params.id,
+          req.body,
+          req.usuario
         );
 
-      }
-    );
-
+      enviarRespuestaExitosa(
+        res,
+        200,
+        "Cita actualizada correctamente",
+        citaActualizada
+      );
+    }
+  );
 
   // =========================================================
   // CANCELAR CITA
   // =========================================================
 
-  static cancelarCita =
-    catchAsync(
-      async (req, res) => {
-
-        const citaCancelada =
-          await CitaService.cancelarCita(
-
-            req.params.id,
-
-            req.usuario
-
-          );
-
-
-        enviarRespuestaExitosa(
-          res,
-          200,
-          "Cita cancelada correctamente",
-          citaCancelada
+  static cancelarCita = catchAsync(
+    async (req, res) => {
+      const citaCancelada =
+        await CitaService.cancelarCita(
+          req.params.id,
+          req.usuario
         );
 
-      }
-    );
-
+      enviarRespuestaExitosa(
+        res,
+        200,
+        "Cita cancelada correctamente",
+        citaCancelada
+      );
+    }
+  );
 }
-
 
 export default CitaController;

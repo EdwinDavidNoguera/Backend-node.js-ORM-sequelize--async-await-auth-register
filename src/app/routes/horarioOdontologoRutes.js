@@ -12,7 +12,7 @@ router.route("/")
 
 // Rutas para /horarios/odontologo/:id_odontologo
 router.route("/odontologo/:id_odontologo")
-  .get(verificarToken, verificarRol("ADMIN", "ODONTOLOGO", "PACIENTE"), horarioOdontologoController.obtenerHorario); // Ver horarios de un odontólogo
+  .get(horarioOdontologoController.obtenerHorario); // Ver horarios de un odontólogo
 
 // Rutas para /horarios/:id
 router.route("/:id")

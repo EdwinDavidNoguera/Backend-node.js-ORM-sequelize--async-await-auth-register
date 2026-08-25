@@ -85,7 +85,7 @@ class UsuarioController {
     const resultado = await UsuarioService.solicitarRecuperacion(email);
     
     // Pasamos el "resultado" que temporalmente contiene el token para poder probar en Postman
-    enviarRespuestaExitosa(res, 200, "Instrucciones de recuperación generadas correctamente", resultado);
+    enviarRespuestaExitosa(res, 200, "Se ha enviado un enlace de recuperación al correo electrónico.");
   });
 
   /**

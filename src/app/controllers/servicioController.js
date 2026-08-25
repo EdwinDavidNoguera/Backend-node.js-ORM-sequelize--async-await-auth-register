@@ -89,7 +89,41 @@ class ServicioController {
       servicio
     );
   });
+
+  /**
+   * Obtiene los odontólogos capacitados para un servicio específico.
+   * GET /api/servicios/:id/odontologos
+   */
+  obtenerOdontologosPorServicio = catchAsync(async (req, res) => {
+    const { id } = req.params;
+    const odontologos = await ServicioService.obtenerOdontologosPorServicio(id);
+
+    enviarRespuestaExitosa(
+      res,
+      200,
+      "Odontólogos asignados al servicio obtenidos correctamente",
+      odontologos
+    );
+  });
+
+  /**
+   * Asigna o actualiza los servicios que presta un odontólogo.
+   * POST /api/servicios/asignar-odontologo
+   */
+  asignarServiciosAOdontologo = catchAsync(async (req, res) => {
+    const { id_odontologo, ids_servicios } = req.body;
+    const resultado = await ServicioService.asignarServiciosAOdontologo(
+      id_odontologo,
+      ids_servicios
+    );
+
+    enviarRespuestaExitosa(
+      res,
+      200,
+      "Servicios asignados al odontólogo con éxito",
+      resultado
+    );
+  });
 }
 
 export default new ServicioController();
-

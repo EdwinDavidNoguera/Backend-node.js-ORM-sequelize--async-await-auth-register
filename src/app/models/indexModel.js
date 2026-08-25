@@ -11,6 +11,7 @@ import Cita from './citaModel.js';
 import HistoriaOdontologica from './historiaOdontologicoModel.js';
 import PerfilOdontologo from './perfilOdontologoModel.js';
 import HorarioOdontologo from './horarioOdontologoModel.js';
+import OdontologoServicio from "./odontologoServicioModel.js";
 
 /**
  * Función para probar la conexión y sincronizar modelos
@@ -72,6 +73,15 @@ Cita.belongsTo(Servicio, { foreignKey: 'id_servicio', as: 'servicio' });
 Cita.hasOne(HistoriaOdontologica, { foreignKey: 'id_cita', as: 'historia', onDelete: 'CASCADE' });
 HistoriaOdontologica.belongsTo(Cita, { foreignKey: 'id_cita', as: 'cita' });
 
+// 8 Odontologo-Servicio (N:N)
+Odontologo.belongsToMany(Servicio, {through: OdontologoServicio, foreignKey: "id_odontologo", otherKey: "id_servicio", as: "servicios", });
+Servicio.belongsToMany(Odontologo, {
+  through: OdontologoServicio,
+  foreignKey: "id_servicio",
+  otherKey: "id_odontologo",
+  as: "odontologos",
+});
+
 
 // ===============================
 // EXPORTACIÓN
@@ -87,5 +97,6 @@ export {
   Cita,
   HistoriaOdontologica,
   PerfilOdontologo,
-  HorarioOdontologo
+  HorarioOdontologo,
+  OdontologoServicio
 };

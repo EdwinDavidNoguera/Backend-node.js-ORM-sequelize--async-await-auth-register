@@ -1,101 +1,145 @@
 import { Router } from "express";
+import jwt from "jsonwebtoken";
 
 import { citaController } from "../controllers/indexController.js";
 
 import verificarToken from "../middlewares/verificarToken.js";
 import verificarRol from "../middlewares/verificarRol.js";
 
-
 const router = Router();
 
-
 // =========================================================
-// TODAS LAS RUTAS DE CITAS REQUIEREN AUTENTICACIÓN
-// =========================================================
-
-router.use(verificarToken);
-
-
-// =========================================================
-// CITAS
+// MIDDLEWARE OPCIONAL DE AUTENTICACIÓN
 // =========================================================
 
-// Crear cita
-//
-// ADMIN
-// ODONTOLOGO
-// PACIENTE
+/**
+ * Permite realizar peticiones tanto autenticadas
+ * como públicas.
+ *
+ * Si existe un JWT válido:
+ *    req.usuario = usuario decodificado
+ *
+ * Si no existe o es inválido:
+ *    req.usuario = null
+ */
+const tokenOpcional = (req, res, next) => {
+  const authHeader = req.headers.authorization;
 
-router.post("/",
-  verificarRol("ADMIN","ODONTOLOGO","PACIENTE"), citaController.crearCita
+  if (
+    !authHeader ||
+    !authHeader.startsWith("Bearer ")
+  ) {
+    req.usuario = null;
+    return next();
+  }
+
+  const token = authHeader.split(" ")[1];
+
+  if (
+    !token ||
+    token === "null" ||
+    token === "undefined"
+  ) {
+    req.usuario = null;
+    return next();
+  }
+
+  try {
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRETA
+    );
+
+    req.usuario = decoded;
+  } catch (error) {
+    // Un token inválido no convierte la petición
+    // en un error para esta ruta pública.
+    req.usuario = null;
+  }
+
+  next();
+};
+
+// =========================================================
+// RUTAS PÚBLICAS
+// =========================================================
+
+/**
+ * Obtener disponibilidad de horarios.
+ */
+router.get(
+  "/disponibilidad",
+  citaController.obtenerDisponibilidad
 );
 
-
-// Obtener todas las citas
-//
-// Solamente ADMIN.
-// El frontend de pacientes y odontólogos
-// utilizará las rutas específicas.
-
-router.get("/", verificarRol("ADMIN"), citaController.obtenerCitas
+/**
+ * Verificar si un correo pertenece a un paciente
+ * y si ese paciente tiene una cuenta.
+ */
+router.get(
+  "/verificar-email",
+  citaController.verificarEmail
 );
 
+/**
+ * Crear cita.
+ *
+ * Puede ser:
+ * - invitado
+ * - paciente autenticado
+ * - administrador
+ * - odontólogo
+ */
+router.post(
+  "/",
+  tokenOpcional,
+  citaController.crearCita
+);
 
 // =========================================================
-// CITAS POR ODONTÓLOGO
+// RUTAS PROTEGIDAS
 // =========================================================
 
-// ADMIN:
-// puede consultar cualquier odontólogo.
-//
-// ODONTOLOGO:
-// solamente puede consultar sus propias citas.
-//
-// El servicio verifica la propiedad.
+/**
+ * Obtener todas las citas.
+ */
+router.get(
+  "/",
+  verificarToken,
+  verificarRol("ADMIN"),
+  citaController.obtenerCitas
+);
 
+/**
+ * Obtener citas de un odontólogo.
+ */
 router.get(
   "/odontologo/:id_odontologo",
-  verificarRol(
-    "ADMIN",
-    "ODONTOLOGO"
-  ),
+  verificarToken,
+  verificarRol("ADMIN", "ODONTOLOGO"),
   citaController.obtenerCitasPorOdontologo
 );
 
-
-// =========================================================
-// CITAS POR PACIENTE
-// =========================================================
-
-// ADMIN:
-// puede consultar cualquier paciente.
-//
-// PACIENTE:
-// solamente puede consultar sus propias citas.
-//
-// El servicio verifica la propiedad.
-
-router.get("/paciente/:id_paciente", verificarRol("ADMIN", "PACIENTE", "ODONTOLOGO"), citaController.obtenerCitasPorPaciente
+/**
+ * Obtener citas de un paciente.
+ */
+router.get(
+  "/paciente/:id_paciente",
+  verificarToken,
+  verificarRol(
+    "ADMIN",
+    "PACIENTE",
+    "ODONTOLOGO"
+  ),
+  citaController.obtenerCitasPorPaciente
 );
 
-
-// =========================================================
-// CITA POR ID
-// =========================================================
-
-// ADMIN:
-// cualquier cita.
-//
-// ODONTOLOGO:
-// solamente sus citas.
-//
-// PACIENTE:
-// solamente sus citas.
-//
-// El servicio realiza la comprobación.
-
+/**
+ * Obtener una cita específica.
+ */
 router.get(
   "/:id",
+  verificarToken,
   verificarRol(
     "ADMIN",
     "ODONTOLOGO",
@@ -104,20 +148,12 @@ router.get(
   citaController.obtenerCitaPorId
 );
 
-
-// =========================================================
-// ACTUALIZAR CITA
-// =========================================================
-
-// ADMIN
-// ODONTOLOGO
-// PACIENTE
-//
-// El servicio verifica que solamente
-// puedan modificar una cita que les corresponde.
-
+/**
+ * Actualizar una cita.
+ */
 router.put(
   "/:id",
+  verificarToken,
   verificarRol(
     "ADMIN",
     "ODONTOLOGO",
@@ -126,19 +162,12 @@ router.put(
   citaController.actualizarCita
 );
 
-
-// =========================================================
-// CANCELAR CITA
-// =========================================================
-
-// ADMIN
-// ODONTOLOGO
-// PACIENTE
-//
-// El servicio verifica la propiedad.
-
+/**
+ * Cancelar una cita.
+ */
 router.put(
   "/:id/cancelar",
+  verificarToken,
   verificarRol(
     "ADMIN",
     "ODONTOLOGO",
@@ -146,6 +175,5 @@ router.put(
   ),
   citaController.cancelarCita
 );
-
 
 export default router;

@@ -10,6 +10,9 @@ const router = express.Router();
 /*Rutas para /servicios http://localhost:3500/servicios
 usamos los 3 middlewares: verificarToken, verificarRol y upload.single("img") para proteger la ruta de creación de servicios y permitir la carga de imágenes.*/
 
+// Consulta pública para el agendamiento (invitados y usuarios)
+router.get("/:id/odontologos", servicioController.obtenerOdontologosPorServicio);
+
 router.route("/")
   .get(servicioController.obtenerTodosServicios) // Obtener todos los servicios publico
   .post( verificarToken, verificarRol("ADMIN"), upload.single("img"),

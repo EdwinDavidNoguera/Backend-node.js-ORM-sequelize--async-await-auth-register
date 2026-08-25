@@ -45,14 +45,6 @@ Cita.init(
     },
 
     /**
-     * Relación con consultorio (opcional)
-     */
-    id_consultorio: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-    },
-
-    /**
      * Fecha de la cita
      * Formato: YYYY-MM-DD
      */
