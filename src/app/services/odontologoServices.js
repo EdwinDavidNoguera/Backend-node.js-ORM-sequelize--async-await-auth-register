@@ -11,9 +11,7 @@ import path from "path";
 class OdontologoService {
 
 
-  // ==========================================
-  // CONFIGURACIÓN DE IMÁGENES
-  // ==========================================
+  // Configuración de imágenes.
 
   static rutaUploads = path.resolve(
     "src/app/uploads/perfiles_odontologos"
@@ -23,9 +21,7 @@ class OdontologoService {
     "perfil-default.png";
 
 
-  // ==========================================
-  // VALIDACIONES
-  // ==========================================
+  // Validaciones del formulario.
 
   static validarFormularioOdontologo(
     datos,
@@ -228,9 +224,7 @@ class OdontologoService {
   }
 
 
-  // ==========================================
-  // ELIMINAR IMAGEN FÍSICA
-  // ==========================================
+  // Elimina una imagen física que ya no se utiliza.
 
   static eliminarImagenFisica(img) {
 
@@ -243,7 +237,7 @@ class OdontologoService {
       path.basename(img);
 
 
-    // Nunca eliminar la imagen por defecto
+    // Conserva la imagen predeterminada.
 
     if (
       nombreArchivo ===
@@ -282,33 +276,12 @@ class OdontologoService {
   }
 
 
-  // ==========================================
-  // OBTENER IMAGEN VÁLIDA
-  // ==========================================
-  //
-  // Esta función normaliza la imagen que se
-  // devuelve al frontend.
-  //
-  // SQL puede tener:
-  //
-  // perfil-default.png
-  //
-  // o:
-  //
-  // /uploads/perfiles/odontologos/foto.jpg
-  //
-  // Pero el frontend siempre recibirá:
-  //
-  // /uploads/perfiles/odontologos/nombre.jpg
-  //
-  // ==========================================
+  // Normaliza la ruta de la imagen devuelta al cliente.
 
   static obtenerImagenValida(img) {
 
 
-    // ==========================================
-    // SIN IMAGEN
-    // ==========================================
+    // Usa la imagen predeterminada cuando no existe una imagen.
 
     if (!img) {
 
@@ -317,17 +290,13 @@ class OdontologoService {
     }
 
 
-    // ==========================================
-    // OBTENER SOLO EL NOMBRE DEL ARCHIVO
-    // ==========================================
+    // Obtiene únicamente el nombre del archivo.
 
     const nombreArchivo =
       path.basename(img);
 
 
-    // ==========================================
-    // IMAGEN POR DEFECTO
-    // ==========================================
+    // Devuelve la ruta de la imagen predeterminada.
 
     if (
       nombreArchivo ===
@@ -339,9 +308,7 @@ class OdontologoService {
     }
 
 
-    // ==========================================
-    // RUTA FÍSICA
-    // ==========================================
+    // Construye la ruta física de la imagen.
 
     const rutaImagen =
       path.join(
@@ -350,9 +317,7 @@ class OdontologoService {
       );
 
 
-    // ==========================================
-    // COMPROBAR EXISTENCIA
-    // ==========================================
+    // Comprueba que la imagen exista.
 
     if (
       !fs.existsSync(
@@ -375,18 +340,13 @@ class OdontologoService {
     }
 
 
-    // ==========================================
-    // IMAGEN EXISTE
-    // ==========================================
-
+    // Devuelve la ruta de la imagen existente.
     return `/uploads/perfiles_odontologos/${nombreArchivo}`;
 
   }
 
 
-  // ==========================================
-  // NORMALIZAR PERFIL
-  // ==========================================
+  // Normaliza la imagen del perfil.
 
   static normalizarPerfil(perfil) {
 
@@ -406,9 +366,7 @@ class OdontologoService {
   }
 
 
-  // ==========================================
-  // CREAR ODONTÓLOGO
-  // ==========================================
+  // Crea un odontólogo y sus datos asociados.
 
   static async crearOdontologo(
     datos,
@@ -427,7 +385,7 @@ class OdontologoService {
       password,
       avatar,
 
-      // Datos del perfil
+      // Datos del perfil profesional.
 
       titulo_profesional,
       universidad,
@@ -437,9 +395,7 @@ class OdontologoService {
     } = datos;
 
 
-    // ==========================================
-    // VALIDAR ODONTÓLOGO
-    // ==========================================
+    // Valida los datos del odontólogo.
 
     this.validarFormularioOdontologo(
       datos,
@@ -449,9 +405,7 @@ class OdontologoService {
     );
 
 
-    // ==========================================
-    // VALIDAR PERFIL
-    // ==========================================
+    // Valida los datos del perfil profesional.
 
     const erroresPerfil = {};
 
@@ -480,9 +434,7 @@ class OdontologoService {
     }
 
 
-    // ==========================================
-    // CREAR TRANSACCIÓN
-    // ==========================================
+    // Inicia la transacción de registro.
 
     const transaction =
       await sequelize.transaction();
@@ -491,9 +443,7 @@ class OdontologoService {
     try {
 
 
-      // ==========================================
-      // VALIDAR CÉDULA
-      // ==========================================
+      // Comprueba que la cédula no esté registrada.
 
       const cedulaExistente =
         await Odontologo.findOne({
@@ -521,9 +471,7 @@ class OdontologoService {
       }
 
 
-      // ==========================================
-      // CREAR USUARIO
-      // ==========================================
+      // Crea el usuario asociado.
 
       const nuevoUsuario =
         await UsuarioService.crearUsuario(
@@ -550,9 +498,7 @@ class OdontologoService {
         );
 
 
-      // ==========================================
-      // QUITAR PASSWORD DE LA RESPUESTA
-      // ==========================================
+      // Excluye la contraseña de la respuesta.
 
       const usuarioSinPassword =
         nuevoUsuario.toJSON();
@@ -561,9 +507,7 @@ class OdontologoService {
       delete usuarioSinPassword.password;
 
 
-      // ==========================================
-      // CREAR ODONTÓLOGO
-      // ==========================================
+      // Crea el odontólogo asociado.
 
       const nuevoOdontologo =
         await Odontologo.create(
@@ -602,9 +546,7 @@ class OdontologoService {
         );
 
 
-      // ==========================================
-      // CREAR PERFIL
-      // ==========================================
+      // Crea el perfil profesional.
 
       const nuevoPerfil =
         await PerfilOdontologo.create(

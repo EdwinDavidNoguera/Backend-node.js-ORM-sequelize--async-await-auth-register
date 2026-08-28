@@ -397,7 +397,7 @@ async actualizarOdontologo(req, res) {
       passwordHash = await bcrypt.hash(password, 10);
     }
 
-    // Validar número de licencia solo si se envió y cambió , no muy util
+    // Valida el número de licencia cuando se envía y cambia.
     if (numero_licencia && numero_licencia !== odontologo.numero_licencia) {
       if (!regexLicencia.test(numero_licencia)) {
         errores.numero_licencia = "El número de licencia no es válido";

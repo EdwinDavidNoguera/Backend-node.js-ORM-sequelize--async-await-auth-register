@@ -4,15 +4,13 @@ import AppError from "./errors/appError.js";
 
 class EmailService {
 
-  // Eliminamos el constructor
+  // La configuración del transporte se realiza al enviar cada mensaje.
 
   async enviarCorreoRecuperacion(destinatario, urlRecuperacion) {
 
     try {
 
-      // 1. configuramos el transporte de correo usando nodemailer y Gmail
-
-      // Nota: se configuro el acceso a aplicaciones menos seguras en la cuenta de Gmail para permitir el envío de correos desde nodemailer.
+      // Configura el transporte de correo mediante Gmail.
 
       const transporter = nodemailer.createTransport({
 
@@ -28,7 +26,7 @@ class EmailService {
 
       });
 
-      // 2. Preparamos el contenido del correo
+      // Prepara el contenido del correo de recuperación.
 
       const mailOptions = {
 
@@ -74,8 +72,7 @@ class EmailService {
 
       };
 
-      // 3. Enviamos el correo
-
+      // Envía el correo de recuperación.
       await transporter.sendMail(mailOptions);
 
     } catch (error) {
@@ -94,8 +91,6 @@ class EmailService {
 
   }
 
-
-  // Añadir este método a tu clase EmailService dentro de EmailService.js
 
   async enviarCorreoConfirmacionCita(destinatario, datosCita) {
 
@@ -159,7 +154,7 @@ class EmailService {
 
       console.error("Error al enviar correo de cita:", error);
 
-      // No interrumpimos la respuesta si falla únicamente el envío de correo
+      // El fallo del correo no debe interrumpir la respuesta principal.
 
     }
 

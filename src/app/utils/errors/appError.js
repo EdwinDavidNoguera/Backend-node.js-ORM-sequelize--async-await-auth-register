@@ -13,11 +13,11 @@
  */
 class AppError extends Error {
   constructor(message, statusCode = 400, errors = null) {
-    super(message);            // Llama al constructor de la clase padre (Error)
-    this.statusCode = statusCode; // 
+    super(message);            // Inicializa la clase base Error.
+    this.statusCode = statusCode;
     this.errors = errors;
 
-    // Captura la pila de llamadas para este error, excluyendo el constructor de AppError)
+    // Excluye el constructor de AppError de la pila de llamadas.
     Error.captureStackTrace(this, this.constructor);
   }
 }
@@ -25,22 +25,22 @@ class AppError extends Error {
 export default AppError;
 
 
-//Errores comunes:
-// Error de validación (faltan datos)
+// Ejemplos de errores controlados:
+// Error de validación.
 // throw new AppError("El campo email es requerido", 400, { campo: "email" });
 
-// // No autenticado
+// Error de autenticación.
 // throw new AppError("Debes iniciar sesión", 401);
 
-// // No autorizado
+// Error de autorización.
 // throw new AppError("No tienes permisos para acceder a este recurso", 403);
 
-// // Recurso no encontrado
+// Recurso no encontrado.
 // throw new AppError("Paciente no encontrado", 404);
 
-// // Conflicto (email duplicado)
+// Conflicto por correo duplicado.
 // throw new AppError("El email ya está registrado", 409);
 
-// // Error interno (algo inesperado)
+// Error interno inesperado.
 // throw new AppError("Error en el servidor", 500);
 

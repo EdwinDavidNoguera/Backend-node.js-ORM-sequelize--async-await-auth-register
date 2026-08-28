@@ -1,7 +1,7 @@
-// Importamos las herramientas necesarias de Sequelize
+// Importa las herramientas necesarias de Sequelize.
 import { DataTypes, Model } from "sequelize";
 
-// Importamos la conexión a la base de datos
+// Importa la conexión a la base de datos.
 import sequelize from "./db.js";
 
 /**
@@ -16,7 +16,7 @@ import sequelize from "./db.js";
  */
 class Usuario extends Model {}
 
-// Inicializamos el modelo con sus atributos y configuración
+// Define los atributos y la configuración del modelo.
 Usuario.init(
   {
     /**
@@ -108,5 +108,5 @@ Usuario.init(
   }
 );
 
-// Exportamos el modelo
+// Exporta el modelo.
 export default Usuario;

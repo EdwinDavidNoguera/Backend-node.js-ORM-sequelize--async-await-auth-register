@@ -1,5 +1,5 @@
 const manejadorErrorEnDB = (err, req, res, next) => {
-  // 🟢 Si Express ya envió las cabeceras, delega el error para evitar duplicar respuesta
+  // Delega el error si Express ya envió las cabeceras.
   if (res.headersSent) {
     return next(err);
   }
@@ -44,7 +44,7 @@ const manejadorErrorEnDB = (err, req, res, next) => {
       break;
 
     default:
-      // fallback: error inesperado
+      // Usa la información disponible para errores no clasificados.
       status = err.statusCode || 500;
       message = err.message || "Error interno en la base de datos";
       errors = err.errors || {};

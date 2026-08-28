@@ -8,10 +8,10 @@
  */
 const enviarRespuestaExitosa = (res, statusCode, message, data = null) => {
   res.status(statusCode).json({
-    success: true,     // Siempre true en caso de éxito
-    message,           // Mensaje descriptivo
-    data,              // Datos de la operación
-    errors: false      // No hay errores
+    success: true,
+    message,
+    data,
+    errors: false
   });
 };
 

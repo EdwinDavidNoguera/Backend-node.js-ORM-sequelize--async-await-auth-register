@@ -5,29 +5,25 @@ import { usuarioController } from '../controllers/indexController.js';
 
 const router = express.Router();
 
-// ==========================================
-// 🔐 RUTAS PÚBLICAS (No requieren autenticación)
-// ==========================================
+// Rutas públicas: no requieren autenticación.
 
-// Solicitar recuperación de contraseña (Genera token)
+// Solicita la recuperación de contraseña y genera un token temporal.
 router.post('/recuperar-password', usuarioController.solicitarRecuperacion);
 
-// Restablecer la contraseña usando el token
+// Restablece la contraseña mediante un token válido.
 router.post('/restablecer-password/:token', usuarioController.restablecerPassword);
 
-// ==========================================
-// 🔒 RUTAS PROTEGIDAS (Requieren token y rol ADMIN)
-// ==========================================
+// Rutas protegidas: requieren token y rol ADMIN.
 
-// Rutas para /api/usuarios/
+// Operaciones sobre la colección de usuarios.
 router.route('/')
-  .get(verificarToken, verificarRol("ADMIN"), usuarioController.obtenerUsuarios)     // Obtener todos los usuarios
-  .post(verificarToken, verificarRol("ADMIN"), usuarioController.crearUsuario);      // Crear un nuevo usuario
+  .get(verificarToken, verificarRol("ADMIN"), usuarioController.obtenerUsuarios)     // Obtiene todos los usuarios.
+  .post(verificarToken, verificarRol("ADMIN"), usuarioController.crearUsuario);      // Crea un usuario.
 
-// Rutas para /api/usuarios/:id
+// Operaciones sobre un usuario identificado por su ID.
 router.route('/:id')
-  .get(verificarToken, verificarRol("ADMIN"), usuarioController.obtenerUsuarioPorId)   // Obtener un usuario por ID
-  .put(verificarToken, verificarRol("ADMIN"), usuarioController.actualizarUsuario)     // Actualizar usuario por ID
-  .delete(verificarToken, verificarRol("ADMIN"), usuarioController.eliminarUsuario);   // Eliminar usuario por ID
+  .get(verificarToken, verificarRol("ADMIN"), usuarioController.obtenerUsuarioPorId)   // Obtiene un usuario.
+  .put(verificarToken, verificarRol("ADMIN"), usuarioController.actualizarUsuario)     // Actualiza un usuario.
+  .delete(verificarToken, verificarRol("ADMIN"), usuarioController.eliminarUsuario);   // Elimina un usuario.
 
 export default router;

@@ -1,7 +1,7 @@
 import UsuarioService from "../services/usuarioService.js";
-import { catchAsync } from "../utils/index.js"; // Tu manejador asíncrono centralizado
+import { catchAsync } from "../utils/index.js"; // Centraliza el manejo de errores asíncronos.
 import enviarRespuestaExitosa from "../utils/errors/manajadorRespuestaExitosa.js";
-import AppError from "../utils/errors/appError.js"; // Importamos AppError por si falta algún dato en el body
+import AppError from "../utils/errors/appError.js"; // Permite responder errores de validación.
 
 class UsuarioController {
   /**
@@ -51,7 +51,7 @@ class UsuarioController {
   actualizarUsuario = catchAsync(async (req, res) => {
     const { id } = req.params;
     
-    // Pasamos el req.body directamente ya que el servicio filtra los campos permitidos
+    // El servicio filtra los campos permitidos antes de actualizar.
     const usuarioActualizado = await UsuarioService.actualizarUsuario(id, req.body);
     
     enviarRespuestaExitosa(res, 200, "Usuario actualizado con éxito", usuarioActualizado);
@@ -67,9 +67,7 @@ class UsuarioController {
     enviarRespuestaExitosa(res, 200, "Usuario eliminado permanentemente");
   });
 
-  // ==========================================
-  // 🔐 FLUJO DE RECUPERACIÓN DE CONTRASEÑA
-  // ==========================================
+  // Flujo de recuperación de contraseña.
 
   /**
    * Solicitar recuperación de contraseña (Genera token)
@@ -84,7 +82,6 @@ class UsuarioController {
 
     const resultado = await UsuarioService.solicitarRecuperacion(email);
     
-    // Pasamos el "resultado" que temporalmente contiene el token para poder probar en Postman
     enviarRespuestaExitosa(res, 200, "Se ha enviado un enlace de recuperación al correo electrónico.");
   });
 
@@ -102,7 +99,6 @@ class UsuarioController {
 
     await UsuarioService.restablecerPassword(token, nuevaPassword);
     
-    // Como no devolvemos data, omitimos el cuarto parámetro
     enviarRespuestaExitosa(res, 200, "La contraseña ha sido actualizada exitosamente");
   });
 }

@@ -8,21 +8,16 @@ import uploadPerfilOdontologo from "../middlewares/uploadPerfilOdontologo.js";
 
 const router = express.Router();
 
-// ==========================================
-// RUTAS PARA /odontologos
-// ==========================================
+// Rutas para /odontologos.
 
 router.route("/")
 
-  // Obtener todos los odontólogos
+  // Obtiene todos los odontólogos.
   .get(
     odontologoController.obtenerOdontologos
   )
 
-  // Crear un nuevo odontólogo
-  //
-  // uploadPerfilOdontologo.single("img")
-  // recibe una sola imagen desde el campo "img"
+  // Crea un odontólogo y procesa una imagen opcional en el campo img.
   .post(
     verificarToken,
     verificarRol("ADMIN"),
@@ -31,18 +26,16 @@ router.route("/")
   );
 
 
-// ==========================================
-// RUTAS PARA /odontologos/:id
-// ==========================================
+// Rutas para /odontologos/:id.
 
 router.route("/:id")
 
-  // Obtener odontólogo por ID
+  // Obtiene un odontólogo por ID.
   .get(
     odontologoController.obtenerOdontologoPorId
   )
 
-  // Actualizar odontólogo por ID
+  // Actualiza un odontólogo por ID.
   .put(
     verificarToken,
     verificarRol("ADMIN", "ODONTOLOGO"),
@@ -50,7 +43,7 @@ router.route("/:id")
     odontologoController.actualizarOdontologo
   )
 
-  // Eliminar odontólogo por ID
+  // Elimina un odontólogo por ID.
   .delete(
     verificarToken,
     verificarRol("ADMIN"),

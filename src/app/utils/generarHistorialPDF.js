@@ -316,9 +316,7 @@ function dibujarEncabezado(
     .fill()
     .restore();
 
-  // ----------------------------------------------------------
-  // CUIDAMOS TU SONRISA
-  // ----------------------------------------------------------
+  // Mensaje institucional.
 
   doc
     .fillColor(COLOR_PRIMARIO)

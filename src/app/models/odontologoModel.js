@@ -1,4 +1,4 @@
-// Importamos Sequelize
+// Importa Sequelize.
 import { DataTypes, Model } from "sequelize";
 import sequelize from "./db.js";
 
@@ -81,9 +81,7 @@ Odontologo.init(
     modelName: "Odontologo",
     tableName: "odontologo",
 
-    /**
-     * La tabla NO tiene timestamps
-     */
+    /** La tabla no tiene marcas de tiempo. */
     timestamps: false,
   }
 );

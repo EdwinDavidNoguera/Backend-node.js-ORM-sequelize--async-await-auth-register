@@ -10,7 +10,7 @@ class HorarioOdontologoService {
   static async crearHorario(data, transaction = null) {
     const { id_odontologo, dia_semana, hora_inicio, hora_fin } = data;
     
-    // Si no existe, lanzamos el error que será atrapado por el catchAsync
+    // Si no existe, propaga el error al manejador asíncrono.
     const odontologo = await Odontologo.findByPk(id_odontologo);
     if (!odontologo) {
       throw new AppError('El odontólogo no existe en el sistema', 404);

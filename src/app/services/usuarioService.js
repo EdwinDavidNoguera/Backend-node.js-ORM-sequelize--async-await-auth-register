@@ -3,7 +3,7 @@ import bcrypt from "bcrypt";
 import crypto from "crypto";
 import AppError from "../utils/errors/appError.js";
 import { Op } from "sequelize";
-import EmailService from "../utils/emailService.js"; //Funcion para enviar correos electrónicos
+import EmailService from "../utils/emailService.js"; // Servicio para enviar correos electrónicos.
 
 class UsuarioService {
 
@@ -15,7 +15,7 @@ class UsuarioService {
   static validarDatosCredenciales({ email, password }) {
     const errores = {};
 
-    // Validar que los campos obligatorios tengan información.
+    // Comprueba que los campos obligatorios tengan información.
     if (!email || email.trim() === "") {
       errores.email = "El correo es obligatorio";
     }
@@ -24,14 +24,14 @@ class UsuarioService {
       errores.password = "La contraseña es obligatoria";
     }
 
-    // Validar el formato del correo electrónico.
+    // Comprueba el formato del correo electrónico.
     const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (email && !regexEmail.test(email.trim())) {
       errores.email = "El correo electrónico no es válido";
     }
 
-    // Validar los requisitos de seguridad de la contraseña.
+    // Comprueba los requisitos de seguridad de la contraseña.
     const regexPassword =
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
 
@@ -40,7 +40,7 @@ class UsuarioService {
         "La contraseña debe tener mínimo 8 caracteres, incluyendo mayúsculas, minúsculas, números y caracteres especiales.";
     }
 
-    // Si existen errores, se envían todos juntos.
+    // Devuelve todos los errores de validación en una sola respuesta.
     if (Object.keys(errores).length > 0) {
       throw new AppError(
         "Error de validación en las credenciales",
@@ -60,17 +60,17 @@ class UsuarioService {
     const { email, password, rol, avatar } = datos;
     const { transaction } = options;
 
-    // Validar los datos recibidos.
+    // Valida los datos recibidos.
     this.validarDatosCredenciales({ email, password });
 
-    // Verificar que el correo no esté registrado.
+    // Comprueba que el correo no esté registrado.
     const usuarioExistente = await Usuario.findOne({
       where: { email: email.trim() },
       transaction
     });
 
     if (usuarioExistente) {
-      // El error indica específicamente el campo que presenta el problema.
+      // Identifica el campo que provoca el conflicto.
       throw new AppError(
         "El correo ya está registrado",
         409,
@@ -78,10 +78,10 @@ class UsuarioService {
       );
     }
 
-    // Cifrar la contraseña antes de guardarla en la base de datos.
+    // Cifra la contraseña antes de guardarla en la base de datos.
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Crear el nuevo usuario.
+    // Crea el nuevo usuario.
     const nuevoUsuario = await Usuario.create(
       {
         email: email.trim(),
@@ -99,59 +99,55 @@ class UsuarioService {
   /**
    * Solicita la recuperación de contraseña de un usuario.
    *
-   * El método:
+  * Este flujo:
    * 1. Busca el usuario mediante su correo.
    * 2. Genera un token aleatorio.
    * 3. Define una fecha de expiración para el token.
    * 4. Guarda ambos valores en la tabla usuario.
-   * 5. (Próximamente) Envía el token por correo electrónico.
+  * 5. Envía el token por correo electrónico.
    */
   static async solicitarRecuperacion(email) {
 
-    // Buscar el usuario mediante su correo electrónico.
+    // Busca el usuario mediante su correo electrónico.
     const usuario = await Usuario.findOne({
       where: { email: email.trim() }
     });
 
-    // Verificar que exista un usuario asociado al correo.
+    // Comprueba que exista un usuario asociado al correo.
     if (!usuario) {
       throw new AppError("Usuario no encontrado", 404);
     }
 
-    // Generar un token aleatorio y seguro utilizando crypto.
+    // Genera un token aleatorio y seguro mediante crypto.
     const token = crypto.randomBytes(20).toString("hex");
 
-    // Establecer una duración de 2 horas para el token.
+    // Establece una duración de dos horas para el token.
     const expiracion = new Date(
       Date.now() + 2 * 60 * 60 * 1000
     );
 
-    // Guardar el token y su fecha de expiración en el usuario.
+    // Guarda el token y su fecha de expiración en el usuario.
     await usuario.update({
       reset_password_token: token,
       reset_password_expires: expiracion
     });
 
-    // ==========================================
-    // 📧 PREPARACIÓN PARA ENVÍO DE CORREO
-    // ==========================================
+    // Prepara el enlace de recuperación y envía el correo.
     
-    // 1. Construir la URL que apuntará a tu frontend en React
+    // Construye el enlace que utilizará el cliente para restablecer la contraseña.
     const urlReact = `http://localhost:5173/restablecer-password/${token}`;
     
-    // 2. Enviar el correo usando nuestro futuro servicio (Descomentar en el próximo paso)
     await EmailService.enviarCorreoRecuperacion(usuario.email, urlReact);
 
     /*
-     * TEMPORAL COMENTADO:
-     * Ya no devolvemos el token al frontend por seguridad.
-     * * return {
+      * El token no se devuelve al cliente por seguridad.
+      * return {
      * token,
      * expiracion
      * };
      */
      
-    // Simplemente retornamos true indicando que el proceso terminó con éxito
+        // Indica que el proceso terminó correctamente.
     return true; 
   }
 
@@ -204,7 +200,7 @@ class UsuarioService {
     const { email, password, avatar, activo, rol } = datos;
     const errores = {};
 
-    // Validar el nuevo correo y comprobar que no esté siendo utilizado.
+    // Valida el nuevo correo y comprueba que no esté siendo utilizado.
     if (email && email.trim() !== usuario.email) {
       const emailLimpio = email.trim();
       const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

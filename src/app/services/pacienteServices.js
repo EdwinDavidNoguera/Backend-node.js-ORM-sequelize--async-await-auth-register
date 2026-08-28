@@ -11,10 +11,10 @@ class PacienteService {
     const { requierePassword = false, esActualizacion = false } = opciones;
     const { nombre, apellido, celular, email, password, fecha_nacimiento } =
       datos;
-    // Objeto para acumular errores de validación
+    // Acumula los errores de validación por campo.
     const errores = {};
 
-    // 1. Validaciones de presencia (Solo si no es una actualización parcial)
+    // 1. Comprueba la presencia de los campos en registros completos.
     if (!esActualizacion) {
       if (!nombre || nombre.trim() === "")
         errores.nombre = "El nombre es obligatorio";
@@ -26,7 +26,7 @@ class PacienteService {
         errores.email = "El correo es obligatorio";
     }
 
-    // 2. Validación de formato de Email
+    // 2. Comprueba el formato del correo electrónico.
     if (email && email.trim() !== "") {
       const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!regexEmail.test(email.trim())) {
@@ -34,7 +34,7 @@ class PacienteService {
       }
     }
 
-    // 3. Validación de Celular (Atrapado antes de que toque la Base de Datos)
+    // 3. Valida el celular antes de consultar la base de datos.
     if (celular && celular.trim() !== "") {
       const celularLimpio = celular.trim();
       if (celularLimpio.length !== 10) {
@@ -44,7 +44,7 @@ class PacienteService {
       }
     }
 
-    // 4. Validación de Contraseña (Fuerte)
+    // 4. Comprueba los requisitos de seguridad de la contraseña.
     if (requierePassword && !password) {
       errores.password = "La contraseña es obligatoria para crear una cuenta";
     } else if (password) {
@@ -55,7 +55,7 @@ class PacienteService {
       }
     }
 
-    // 5. Validación de Fecha de Nacimiento
+    // 5. Comprueba el formato y el valor de la fecha de nacimiento.
     if (fecha_nacimiento) {
       const regexFecha = /^\d{4}-\d{2}-\d{2}$/;
       if (!regexFecha.test(fecha_nacimiento)) {
@@ -69,7 +69,7 @@ class PacienteService {
       }
     }
 
-    // Si el objeto acumuló  errores en el objeto errores, disparamos todos los errores al mismo tiempo
+    // Devuelve todos los errores de validación en una sola respuesta.
     if (Object.keys(errores).length > 0) {
       throw new AppError("Error de validación en el formulario", 400, errores);
     }
@@ -92,10 +92,10 @@ class PacienteService {
       avatar,
     } = datos;
 
-    // 1. Ejecutamos la validación integral masiva
+    // 1. Valida todos los datos recibidos.
     this.validarFormularioPaciente(datos, { requierePassword: true });
 
-    // 2. Iniciamos la transacción de forma segura
+    // 2. Inicia la transacción que coordina ambas operaciones.
     const transaction = await sequelize.transaction();
 
     try {
@@ -114,7 +114,7 @@ class PacienteService {
         }
       }
 
-      // Crear Usuario heredando la transacción
+      // Crea el usuario dentro de la misma transacción.
       const nuevoUsuario = await UsuarioService.crearUsuario(
         {
           email: email.trim(),
@@ -128,7 +128,7 @@ class PacienteService {
       const usuarioSinPassword = nuevoUsuario.toJSON();
       delete usuarioSinPassword.password;
 
-      // Crear Paciente heredando la transacción
+      // Crea el paciente dentro de la misma transacción.
       const nuevoPaciente = await Paciente.create(
         {
           id_usuario: nuevoUsuario.id,
@@ -153,31 +153,30 @@ class PacienteService {
   }
 
   /**
-   * Se encarga de procesar la información de un visitante, 
-   * verificando si ya existe en la base de datos y actualizando o creando un registro según corresponda.
+  * Procesa los datos de un visitante y actualiza o crea el registro correspondiente.
    */
   static async procesarVisitante(datos) {
     const { nombre, apellido, celular, genero, email } = datos;
 
-    // Validación masiva de formatos y vacíos
+    // Valida formatos y campos obligatorios.
     this.validarFormularioPaciente(datos);
 
-    // 1. Buscar por email
+    // 1. Busca por correo electrónico.
     let pacienteExistente = await Paciente.findOne({
       where: { email: email.trim() },
     });
 
-    // 2. Si no está, buscar por celular
+    // 2. Si no existe, busca por celular.
     if (!pacienteExistente) {
       pacienteExistente = await Paciente.findOne({
         where: { celular: celular.trim() },
       });
     }
 
-    // 3. Si se encontró por cualquiera de las dos vías
+    // 3. Resuelve el registro encontrado por cualquiera de los dos criterios.
     if (pacienteExistente) {
       if (pacienteExistente.id_usuario !== null) {
-        // Detectamos un conflicto: el paciente ya tiene una cuenta asociada
+        // El paciente ya tiene una cuenta asociada.
         const esConflictoEmail = pacienteExistente.email === email.trim();
         const campoCulpable = esConflictoEmail ? "email" : "celular";
         const mensajeDetallado = esConflictoEmail
@@ -187,11 +186,11 @@ class PacienteService {
         throw new AppError(
           "Este correo/celular pertenece a una cuenta registrada. Por favor, inicia sesión para agendar.",
           409,
-          { [campoCulpable]: mensajeDetallado }, // Corregido: campoCulpable
+          { [campoCulpable]: mensajeDetallado },
         );
       }
 
-      // Si existía como visitante previo (id_usuario === null), se actualizan sus datos
+      // Actualiza los datos de un visitante existente.
       return await pacienteExistente.update({
         nombre: nombre.trim(),
         apellido: apellido.trim(),
@@ -200,7 +199,7 @@ class PacienteService {
       });
     }
 
-    // Si es completamente nuevo, se crea
+    // Crea el registro cuando el visitante no existe.
     return await Paciente.create({
       nombre: nombre.trim(),
       apellido: apellido.trim(),

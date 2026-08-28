@@ -1,4 +1,4 @@
-// middlewares/errorMiddleware.js
+// Middleware global de respuestas de error.
 
 
 /**
@@ -11,7 +11,6 @@
  * - El campo 'errors' puede contener detalles adicionales (por ejemplo, validaciones).
  * - El campo 'data' es null porque hubo un error.
  */
-// middlewares/errorGlobal.js
 const manejadorRespuestaError = (err, req, res, next) => {
   
   if (
@@ -19,7 +18,7 @@ const manejadorRespuestaError = (err, req, res, next) => {
     err.name === "SequelizeUniqueConstraintError" ||
     err.name === "SequelizeDatabaseError"
   ) {
-    // Reenvía el error al manejador de DB
+    // Delega los errores de Sequelize al manejador especializado.
     return next(err);
   }
 
@@ -34,29 +33,5 @@ const manejadorRespuestaError = (err, req, res, next) => {
   });
 };
 
-
 export default manejadorRespuestaError;
 
-
-/**
- * USO EN CONTROLADORES:
- * 
- * // Si ocurre un error controlado, lanza una excepción personalizada:
- * if (!usuario) {
- *   // Lanzamos un error con status 404
- *   throw new AppError("Usuario no encontrado", 404);
- * }
- * 
- * // Si todo sale bien, responde normalmente:
- * res.status(200).json({
- *   status: 200,
- *   message: "Usuario encontrado",
- *   data: usuario,
- *   errors: null
- * });
- * 
- * // Si ocurre un error inesperado, pásalo al middleware:
- * } catch (error) {
- *   next(error); // Se envía al middleware global de errores
- * }
- */

@@ -57,12 +57,12 @@ class PacienteController {
   eliminarPaciente = catchAsync(async (req, res) => {
     const { id } = req.params;
     
-    // Captura si el frontend envía el query string explicitamente (?force=true)
+    // Lee el parámetro que permite forzar la eliminación.
     const force = req.query.force === "true";
 
     const resultado = await PacienteService.eliminarPaciente(id, force);
 
-    // Si el servicio detecta citas pendientes y no viene forzado, frena el flujo con un 200 preventivo
+    // Solicita confirmación cuando existen citas pendientes y no se fuerza la operación.
     if (resultado.requiereConfirmacion) {
       return enviarRespuestaExitosa(res, 200, resultado.message, {
         requiereConfirmacion: true,
@@ -70,7 +70,7 @@ class PacienteController {
       });
     }
 
-    // Si no había citas o vino forzado, confirma el borrado absoluto
+    // Confirma la eliminación cuando no existen citas pendientes.
     enviarRespuestaExitosa(res, 200, "Paciente y credenciales asociados eliminados con éxito.");
   });
 }

@@ -82,8 +82,7 @@ class OdontologoController {
 
 
   /**
-   * Actualizar odontólogo,
-   * usuario, perfil e imagen.
+  * Actualiza el odontólogo, su usuario, perfil e imagen.
    */
   actualizarOdontologo = catchAsync(async (req, res) => {
 

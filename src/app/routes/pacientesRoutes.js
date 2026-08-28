@@ -1,25 +1,19 @@
 import express from 'express';
-// Exportado desde el index central para controladores
+// Importa el controlador desde el índice central.
 import {pacienteController} from '../controllers/indexController.js'; 
 const router = express.Router();
 import verificarRol from '../middlewares/verificarRol.js';
 import verificarToken from '../middlewares/verificarToken.js';
 
-// ==========================================
-// 1. RUTAS PARA LA RAÍZ: /api/pacientes/
-// ==========================================
+// Operaciones sobre la colección de pacientes.
 router.route('/')
   .get( verificarToken, verificarRol('ODONTOLOGO', 'ADMIN'), pacienteController.obtenerPacientes)   
   .post(pacienteController.registrarPacienteConUsuario);
 
-// ==========================================
-// 2. RUTA INDEPENDIENTE: /api/pacientes/visitante
-// ==========================================
+// Procesa el registro de un paciente visitante.
 router.post('/visitante', pacienteController.procesarVisitante); 
 
-// ==========================================
-// 3. RUTAS PARAMETRIZADAS: /api/pacientes/:id
-// ==========================================
+// Operaciones sobre un paciente identificado por su ID.
 router.route('/:id') 
   .get( verificarToken, verificarRol('ODONTOLOGO', 'ADMIN'), pacienteController.obtenerPacientePorId)  
   .put( verificarToken, verificarRol('ODONTOLOGO', 'ADMIN'), pacienteController.actualizarPaciente)    
