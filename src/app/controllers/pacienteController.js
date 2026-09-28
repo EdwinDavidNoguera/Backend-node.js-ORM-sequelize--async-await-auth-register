@@ -8,7 +8,7 @@ class PacienteController {
    * POST /api/pacientes/registro
    */
   registrarPacienteConUsuario = catchAsync(async (req, res) => {
-    const resultado = await PacienteService.registrarConUsuario(req.body);
+    const resultado = await PacienteService.registrarPacienteConUsuario(req.body);
     enviarRespuestaExitosa(res, 201, "Paciente y cuenta registrados correctamente", resultado);
   });
 

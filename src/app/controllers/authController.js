@@ -1,4 +1,5 @@
 import Usuario from '../models/usuarioModel.js';
+import Paciente from '../models/pacienteModel.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
@@ -9,8 +10,15 @@ const login = async (req, res) => {
   const { email, password } = req.body;
 
   try { 
-    // Busca el usuario por correo electrónico.
-    const usuario = await Usuario.findOne({ where: { email } });
+    // Busca el usuario por correo electrónico y carga la relación con el paciente.
+    const usuario = await Usuario.findOne({
+      where: { email },
+      include: [{
+        model: Paciente,
+        as: 'paciente',
+        attributes: ['id', 'nombre', 'apellido', 'cedula', 'celular', 'genero', 'fecha_nacimiento', 'direccion', 'email', 'id_usuario']
+      }]
+    });
 
     // Rechaza la solicitud si el usuario no existe o no tiene contraseña asociada.
     if (!usuario || !usuario.password) { 
@@ -35,15 +43,29 @@ const login = async (req, res) => {
       expiresIn: '3h',
     });
 
-    // Devuelve el token y los datos básicos del usuario.
+    const paciente = usuario.paciente ?? null;
+
+    // Devuelve el token y los datos del usuario, dejando el perfil del paciente anidado.
     res.json({ 
       message: "Login exitoso", 
       token, 
       user: {
-        id: usuario.id, 
+        id: usuario.id,
         rol: usuario.rol,
         email: usuario.email,
-        avatar: usuario.avatar
+        avatar: usuario.avatar,
+        paciente: paciente ? {
+          id: paciente.id,
+          nombre: paciente.nombre,
+          apellido: paciente.apellido,
+          cedula: paciente.cedula,
+          celular: paciente.celular,
+          genero: paciente.genero,
+          fecha_nacimiento: paciente.fecha_nacimiento,
+          direccion: paciente.direccion,
+          email: paciente.email,
+          id_usuario: paciente.id_usuario
+        } : null
       }
     });
 

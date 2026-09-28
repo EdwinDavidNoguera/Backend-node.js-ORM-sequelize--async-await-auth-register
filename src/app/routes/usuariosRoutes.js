@@ -20,6 +20,11 @@ router.route('/')
   .get(verificarToken, verificarRol("ADMIN"), usuarioController.obtenerUsuarios)     // Obtiene todos los usuarios.
   .post(verificarToken, verificarRol("ADMIN"), usuarioController.crearUsuario);      // Crea un usuario.
 
+// Autoservicio: el usuario se identifica exclusivamente mediante el token.
+router.route('/mi-cuenta')
+  .get(verificarToken, verificarRol("PACIENTE"), usuarioController.obtenerMiCuenta)
+  .patch(verificarToken, verificarRol("PACIENTE"), usuarioController.actualizarMiCuenta);
+
 // Operaciones sobre un usuario identificado por su ID.
 router.route('/:id')
   .get(verificarToken, verificarRol("ADMIN"), usuarioController.obtenerUsuarioPorId)   // Obtiene un usuario.

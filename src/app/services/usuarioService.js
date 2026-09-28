@@ -1,4 +1,5 @@
 import Usuario from "../models/usuarioModel.js";
+import Paciente from "../models/pacienteModel.js";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 import AppError from "../utils/errors/appError.js";
@@ -161,6 +162,22 @@ class UsuarioService {
 
     const usuario = await Usuario.findByPk(id, {
       attributes: { exclude: ["password"] },
+      include: [{
+        model: Paciente,
+        as: "paciente",
+        attributes: [
+          "id",
+          "nombre",
+          "apellido",
+          "cedula",
+          "celular",
+          "genero",
+          "fecha_nacimiento",
+          "direccion",
+          "email",
+          "id_usuario"
+        ]
+      }],
       transaction
     });
 
@@ -178,7 +195,23 @@ class UsuarioService {
    */
   static async obtenerUsuarios() {
     return await Usuario.findAll({
-      attributes: { exclude: ["password"] }
+      attributes: { exclude: ["password"] },
+      include: [{
+        model: Paciente,
+        as: "paciente",
+        attributes: [
+          "id",
+          "nombre",
+          "apellido",
+          "cedula",
+          "celular",
+          "genero",
+          "fecha_nacimiento",
+          "direccion",
+          "email",
+          "id_usuario"
+        ]
+      }]
     });
   }
 
@@ -260,6 +293,291 @@ class UsuarioService {
     delete usuarioActualizado.password;
 
     return usuarioActualizado;
+  }
+
+  static async obtenerMiCuenta(usuarioId) {
+    const usuario = await Usuario.findByPk(usuarioId, {
+      attributes: ["id", "email", "rol", "avatar"],
+      include: [{
+        model: Paciente,
+        as: "paciente",
+        attributes: [
+          "id",
+          "nombre",
+          "apellido",
+          "cedula",
+          "celular",
+          "genero",
+          "fecha_nacimiento",
+          "direccion",
+          "email",
+          "id_usuario",
+        ],
+      }],
+    });
+
+    if (!usuario || usuario.rol !== "PACIENTE" || !usuario.paciente) {
+      throw new AppError("No se encontró un perfil de paciente asociado", 404);
+    }
+
+    return {
+      usuario: {
+        id: usuario.id,
+        email: usuario.email,
+        rol: usuario.rol,
+        avatar: usuario.avatar,
+      },
+      paciente: usuario.paciente,
+    };
+  }
+
+  static async actualizarMiCuenta(usuarioId, datos) {
+    datos = datos && typeof datos === "object" && !Array.isArray(datos) ? datos : {};
+    const camposPaciente = [
+      "nombre",
+      "apellido",
+      "cedula",
+      "celular",
+      "genero",
+      "fecha_nacimiento",
+      "direccion",
+    ];
+    const camposPermitidos = new Set([
+      ...camposPaciente,
+      "email",
+      "currentPassword",
+      "newPassword",
+    ]);
+    const camposDesconocidos = Object.keys(datos).filter(
+      (campo) => !camposPermitidos.has(campo),
+    );
+
+    if (camposDesconocidos.length > 0) {
+      throw new AppError("La solicitud contiene campos no permitidos", 400, {
+        campos: camposDesconocidos,
+      });
+    }
+
+    const actualizaEmail = Object.hasOwn(datos, "email");
+    const actualizaPassword =
+      Object.hasOwn(datos, "newPassword") && datos.newPassword !== "";
+    const actualizaPaciente = camposPaciente.some((campo) =>
+      Object.hasOwn(datos, campo),
+    );
+
+    if (!actualizaEmail && !actualizaPassword && !actualizaPaciente) {
+      throw new AppError("No se recibieron datos para actualizar", 400);
+    }
+
+    const transaction = await Usuario.sequelize.transaction();
+
+    try {
+      const usuario = await Usuario.findByPk(usuarioId, { transaction });
+
+      if (!usuario || usuario.rol !== "PACIENTE") {
+        throw new AppError("Usuario paciente no encontrado", 404);
+      }
+
+      const paciente = await Paciente.findOne({
+        where: { id_usuario: usuario.id },
+        transaction,
+      });
+
+      if (!paciente) {
+        throw new AppError("No se encontró un perfil de paciente asociado", 404);
+      }
+
+      const nuevoEmail = actualizaEmail
+        ? typeof datos.email === "string"
+          ? datos.email.trim()
+          : ""
+        : usuario.email;
+      const emailCambia = nuevoEmail !== usuario.email;
+      const contraseñaNueva = actualizaPassword ? datos.newPassword : null;
+
+      if (actualizaEmail) {
+        if (
+          !nuevoEmail ||
+          nuevoEmail.length > 100 ||
+          !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(nuevoEmail)
+        ) {
+          throw new AppError("El correo electrónico no es válido", 400, {
+            email: "Ingresa un correo válido de máximo 100 caracteres",
+          });
+        }
+
+        if (emailCambia) {
+          const correoExistente = await Usuario.findOne({
+            where: {
+              email: nuevoEmail,
+              id: { [Op.ne]: usuario.id },
+            },
+            transaction,
+          });
+
+          if (correoExistente) {
+            throw new AppError("El correo ya está en uso", 409, {
+              email: "El correo ya está en uso",
+            });
+          }
+        }
+      }
+
+      let passwordHash;
+      if (actualizaPassword) {
+        if (typeof contraseñaNueva !== "string") {
+          throw new AppError("La nueva contraseña no es válida", 400, {
+            newPassword: "La nueva contraseña debe ser texto",
+          });
+        }
+
+        const regexPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+        if (!regexPassword.test(contraseñaNueva)) {
+          throw new AppError("La nueva contraseña no cumple los requisitos", 400, {
+            newPassword:
+              "Debe tener mínimo 8 caracteres, incluyendo mayúsculas, minúsculas, números y caracteres especiales.",
+          });
+        }
+      }
+
+      if (actualizaPassword) {
+        if (typeof datos.currentPassword !== "string" || !datos.currentPassword) {
+          throw new AppError("Debes confirmar tu contraseña actual", 400, {
+            currentPassword: "La contraseña actual es obligatoria para cambiar credenciales",
+          });
+        }
+
+        const passwordValida = await bcrypt.compare(
+          datos.currentPassword,
+          usuario.password,
+        );
+        if (!passwordValida) {
+          throw new AppError("La contraseña actual es incorrecta", 401, {
+            currentPassword: "Verifica tu contraseña actual",
+          });
+        }
+      }
+
+      if (actualizaPassword) {
+        passwordHash = await bcrypt.hash(contraseñaNueva, 10);
+      }
+
+      const cambiosPaciente = {};
+      for (const campo of camposPaciente) {
+        if (!Object.hasOwn(datos, campo)) continue;
+
+        const valor = datos[campo];
+        const camposOpcionales = ["cedula", "fecha_nacimiento", "direccion"];
+        if (valor === null && camposOpcionales.includes(campo)) {
+          cambiosPaciente[campo] = null;
+          continue;
+        }
+
+        if (typeof valor !== "string" || !valor.trim()) {
+          throw new AppError("Hay datos personales inválidos", 400, {
+            [campo]: "Este campo debe contener un valor válido",
+          });
+        }
+
+        const limitesCampo = {
+          nombre: 80,
+          apellido: 80,
+          cedula: 10,
+          celular: 10,
+          genero: 10,
+          direccion: 150,
+        };
+        if (valor.trim().length > limitesCampo[campo]) {
+          throw new AppError("Hay datos personales inválidos", 400, {
+            [campo]: `El máximo permitido es ${limitesCampo[campo]} caracteres`,
+          });
+        }
+
+        cambiosPaciente[campo] = valor.trim();
+      }
+
+      if (
+        Object.hasOwn(cambiosPaciente, "celular") &&
+        !/^\d{10}$/.test(cambiosPaciente.celular)
+      ) {
+        throw new AppError("El celular no es válido", 400, {
+          celular: "Debe contener exactamente 10 dígitos",
+        });
+      }
+
+      if (
+        Object.hasOwn(cambiosPaciente, "cedula") &&
+        cambiosPaciente.cedula !== null &&
+        !/^\d{1,10}$/.test(cambiosPaciente.cedula)
+      ) {
+        throw new AppError("La cédula no es válida", 400, {
+          cedula: "Debe contener máximo 10 dígitos",
+        });
+      }
+
+      if (
+        Object.hasOwn(cambiosPaciente, "genero") &&
+        !["MASCULINO", "FEMENINO", "OTRO"].includes(cambiosPaciente.genero)
+      ) {
+        throw new AppError("El género no es válido", 400, {
+          genero: "Selecciona una opción válida",
+        });
+      }
+
+      if (
+        Object.hasOwn(cambiosPaciente, "fecha_nacimiento") &&
+        cambiosPaciente.fecha_nacimiento !== null
+      ) {
+        const fecha = cambiosPaciente.fecha_nacimiento;
+        const fechaValida =
+          /^\d{4}-\d{2}-\d{2}$/.test(fecha) &&
+          !Number.isNaN(Date.parse(`${fecha}T00:00:00.000Z`)) &&
+          new Date(`${fecha}T00:00:00.000Z`).toISOString().slice(0, 10) === fecha;
+        if (!fechaValida) {
+          throw new AppError("La fecha de nacimiento no es válida", 400, {
+            fecha_nacimiento: "Usa el formato AAAA-MM-DD",
+          });
+        }
+      }
+
+      if (actualizaEmail) cambiosPaciente.email = nuevoEmail;
+      if (Object.keys(cambiosPaciente).length > 0) {
+        await paciente.update(cambiosPaciente, { transaction });
+      }
+
+      const cambiosUsuario = {};
+      if (actualizaEmail) cambiosUsuario.email = nuevoEmail;
+      if (passwordHash) cambiosUsuario.password = passwordHash;
+      if (Object.keys(cambiosUsuario).length > 0) {
+        await usuario.update(cambiosUsuario, { transaction });
+      }
+
+      await transaction.commit();
+
+      return {
+        usuario: {
+          id: usuario.id,
+          email: usuario.email,
+          rol: usuario.rol,
+          avatar: usuario.avatar,
+        },
+        paciente: {
+          id: paciente.id,
+          nombre: paciente.nombre,
+          apellido: paciente.apellido,
+          cedula: paciente.cedula,
+          celular: paciente.celular,
+          genero: paciente.genero,
+          fecha_nacimiento: paciente.fecha_nacimiento,
+          direccion: paciente.direccion,
+          email: paciente.email,
+          id_usuario: paciente.id_usuario,
+        },
+      };
+    } catch (error) {
+      if (!transaction.finished) await transaction.rollback();
+      throw error;
+    }
   }
 
 

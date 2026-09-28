@@ -5,12 +5,49 @@ import AppError from "../utils/errors/appError.js";
 
 class PacienteService {
   /**
+   * Helper para normalizar cualquier formato de fecha a AAAA-MM-DD
+   */
+  static normalizarFecha(fechaInput) {
+    if (!fechaInput) return null;
+
+    if (typeof fechaInput === "string") {
+      const fechaTrim = fechaInput.trim();
+
+      // Formato AAAA-MM-DD o ISO String (ej. "1980-01-02" o "1980-01-02T00:00:00.000Z")
+      const regexISO = /^(\d{4})-(\d{2})-(\d{2})/;
+      const matchISO = fechaTrim.match(regexISO);
+      if (matchISO) {
+        const [_, anio, mes, dia] = matchISO;
+        return `${anio}-${mes}-${dia}`;
+      }
+
+      // Formato latino DD/MM/AAAA o DD-MM-AAAA (ej. "02/01/1980")
+      const regexLatino = /^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/;
+      const matchLatino = fechaTrim.match(regexLatino);
+      if (matchLatino) {
+        const [_, dia, mes, anio] = matchLatino;
+        return `${anio}-${mes.padStart(2, "0")}-${dia.padStart(2, "0")}`;
+      }
+    }
+
+    // Instancia de Date de JavaScript
+    if (fechaInput instanceof Date && !isNaN(fechaInput.getTime())) {
+      const anio = fechaInput.getFullYear();
+      const mes = String(fechaInput.getMonth() + 1).padStart(2, "0");
+      const dia = String(fechaInput.getDate()).padStart(2, "0");
+      return `${anio}-${mes}-${dia}`;
+    }
+
+    return null;
+  }
+
+  /**
    * Se encarga de validar los datos del formulario de paciente, ya sea para registro o actualización.
    */
   static validarFormularioPaciente(datos, opciones = {}) {
     const { requierePassword = false, esActualizacion = false } = opciones;
-    const { nombre, apellido, celular, email, password, fecha_nacimiento } =
-      datos;
+    const { nombre, apellido, cedula, celular, email, password, fecha_nacimiento } = datos;
+    
     // Acumula los errores de validación por campo.
     const errores = {};
 
@@ -34,17 +71,27 @@ class PacienteService {
       }
     }
 
-    // 3. Valida el celular antes de consultar la base de datos.
+    // 3. Valida el celular (solo números y exactamente 10 dígitos).
     if (celular && celular.trim() !== "") {
       const celularLimpio = celular.trim();
-      if (celularLimpio.length !== 10) {
-        errores.celular = "El celular debe tener exactamente 10 dígitos";
-      } else if (!/^\d+$/.test(celularLimpio)) {
+      if (!/^\d+$/.test(celularLimpio)) {
         errores.celular = "El celular solo debe contener números";
+      } else if (celularLimpio.length !== 10) {
+        errores.celular = "El celular debe tener exactamente 10 dígitos";
       }
     }
 
-    // 4. Comprueba los requisitos de seguridad de la contraseña.
+    // 4. Valida la cédula (solo números y máximo 10 dígitos).
+    if (cedula && cedula.trim() !== "") {
+      const cedulaLimpia = cedula.trim();
+      if (!/^\d+$/.test(cedulaLimpia)) {
+        errores.cedula = "La cédula solo debe contener números";
+      } else if (cedulaLimpia.length > 10) {
+        errores.cedula = "La cédula debe tener máximo 10 dígitos";
+      }
+    }
+
+    // 5. Comprueba los requisitos de seguridad de la contraseña.
     if (requierePassword && !password) {
       errores.password = "La contraseña es obligatoria para crear una cuenta";
     } else if (password) {
@@ -55,17 +102,14 @@ class PacienteService {
       }
     }
 
-    // 5. Comprueba el formato y el valor de la fecha de nacimiento.
+    // 6. Comprueba y normaliza la fecha de nacimiento.
     if (fecha_nacimiento) {
-      const regexFecha = /^\d{4}-\d{2}-\d{2}$/;
-      if (!regexFecha.test(fecha_nacimiento)) {
-        errores.fecha_nacimiento =
-          "El formato de fecha de nacimiento debe ser YYYY-MM-DD";
+      const fechaNormalizada = this.normalizarFecha(fecha_nacimiento);
+      if (!fechaNormalizada) {
+        errores.fecha_nacimiento = "La fecha de nacimiento no es válida";
       } else {
-        const fecha = new Date(fecha_nacimiento);
-        if (isNaN(fecha.getTime())) {
-          errores.fecha_nacimiento = "La fecha de nacimiento no es válida";
-        }
+        // Se actualiza la propiedad con el formato estandarizado AAAA-MM-DD
+        datos.fecha_nacimiento = fechaNormalizada;
       }
     }
 
@@ -79,6 +123,10 @@ class PacienteService {
    * Este método registra un paciente junto con su usuario asociado, asegurando que ambos se creen de manera atómica.
    */
   static async registrarPacienteConUsuario(datos) {
+    // 1. Valida y normaliza todos los datos recibidos.
+    this.validarFormularioPaciente(datos, { requierePassword: true });
+
+    // Se desestructuran los datos una vez normalizada la fecha
     const {
       nombre,
       apellido,
@@ -91,9 +139,6 @@ class PacienteService {
       password,
       avatar,
     } = datos;
-
-    // 1. Valida todos los datos recibidos.
-    this.validarFormularioPaciente(datos, { requierePassword: true });
 
     // 2. Inicia la transacción que coordina ambas operaciones.
     const transaction = await sequelize.transaction();
@@ -153,7 +198,7 @@ class PacienteService {
   }
 
   /**
-  * Procesa los datos de un visitante y actualiza o crea el registro correspondiente.
+   * Procesa los datos de un visitante y actualiza o crea el registro correspondiente.
    */
   static async procesarVisitante(datos) {
     const { nombre, apellido, celular, genero, email } = datos;
@@ -209,33 +254,23 @@ class PacienteService {
       id_usuario: null,
     });
   }
+
   /**
-   *Obtiene todos los pacientes registrados en la 
-   base de datos, incluyendo sus detalles asociados.
+   * Obtiene todos los pacientes registrados en la base de datos.
    */
   static async obtenerPacientes() {
-    return await Paciente.findAll({
-      // include: [
-      //   {
-      //     association: "usuario",
-      //     attributes: { exclude: ["password"] },
-      //   },
-      // ],
-    });
+    return await Paciente.findAll();
   }
-  
+
   static async obtenerPacientePorId(id) {
-    const paciente = await Paciente.findByPk(id, {
-      // include: ["usuario"],
-    });
+    const paciente = await Paciente.findByPk(id);
 
     if (!paciente) throw new AppError("Paciente no encontrado", 404);
     return paciente;
   }
 
   /**
-   * Actualiza la información de un paciente existente, 
-   * permitiendo cambios en sus datos personales y de contacto.
+   * Actualiza la información de un paciente existente.
    */
   static async actualizarPaciente(id, datos) {
     const transaction = await sequelize.transaction();
@@ -270,8 +305,7 @@ class PacienteService {
   }
 
   /**
-   * Elimina un paciente de la base de datos. Si el paciente tiene citas asociadas,
-   * se requiere una confirmación explícita para proceder con la eliminación.
+   * Elimina un paciente de la base de datos.
    */
   static async eliminarPaciente(id, force = false) {
     const transaction = await sequelize.transaction();
@@ -293,7 +327,7 @@ class PacienteService {
       }
 
       await paciente.destroy({ transaction });
-      
+
       // Si el paciente tiene un usuario asociado, también se elimina
       if (paciente.id_usuario) {
         await UsuarioService.eliminarUsuario(paciente.id_usuario, {

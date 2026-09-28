@@ -57,6 +57,16 @@ class UsuarioController {
     enviarRespuestaExitosa(res, 200, "Usuario actualizado con éxito", usuarioActualizado);
   });
 
+  obtenerMiCuenta = catchAsync(async (req, res) => {
+    const cuenta = await UsuarioService.obtenerMiCuenta(req.usuario.id);
+    enviarRespuestaExitosa(res, 200, "Cuenta obtenida con éxito", cuenta);
+  });
+
+  actualizarMiCuenta = catchAsync(async (req, res) => {
+    const cuenta = await UsuarioService.actualizarMiCuenta(req.usuario.id, req.body);
+    enviarRespuestaExitosa(res, 200, "Cuenta y perfil actualizados con éxito", cuenta);
+  });
+
   /**
    * Eliminar usuario (Desencadena borrado en cascada en la DB si aplica)
    * DELETE /api/usuarios/:id

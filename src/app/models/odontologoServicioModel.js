@@ -24,6 +24,12 @@ OdontologoServicio.init(
     modelName: "OdontologoServicio",
     tableName: "odontologo_servicio",
     timestamps: false,
+    indexes: [
+      {
+        unique: true,
+        fields: ["id_odontologo", "id_servicio"]
+      }
+    ]
   }
 );
 

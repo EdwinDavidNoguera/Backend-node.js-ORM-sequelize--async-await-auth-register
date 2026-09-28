@@ -807,7 +807,7 @@ class CitaService {
     // INVITADO
     // =======================================================
 
-    else {
+    else if (!usuario) {
       if (
         !email ||
         !celular ||
@@ -899,6 +899,13 @@ class CitaService {
           );
         }
       }
+    }
+
+    if (!pacienteId) {
+      throw new AppError(
+        "No se pudo asociar un paciente a la cita.",
+        400
+      );
     }
 
     // =======================================================
@@ -1248,6 +1255,12 @@ class CitaService {
     datos,
     usuario
   ) {
+    console.log("DEBUG actualizarCita service:", {
+      id,
+      datos,
+      usuario,
+    });
+
     const cita =
       await Cita.findByPk(id);
 
@@ -1297,6 +1310,19 @@ class CitaService {
     const id_odontologo =
       datos.id_odontologo ??
       cita.id_odontologo;
+
+    console.log("DEBUG actualizarCita service - id_odontologo final:", {
+      recibido: datos.id_odontologo,
+      guardadoEnCita: cita.id_odontologo,
+      final: id_odontologo,
+    });
+
+    if (!id_odontologo) {
+      throw new AppError(
+        "Falta el odontólogo para actualizar la cita. Debes enviar id_odontologo o la cita debe tener uno asociado.",
+        400
+      );
+    }
 
     const id_servicio =
       datos.id_servicio ??
@@ -1431,6 +1457,8 @@ class CitaService {
 
     return cita;
   }
+
+  //Eliminar una cita no es recomendable, ya que se pierde el historial de la misma. Se recomienda usar cancelarCita en su lugar.
 }
 
 export default CitaService;

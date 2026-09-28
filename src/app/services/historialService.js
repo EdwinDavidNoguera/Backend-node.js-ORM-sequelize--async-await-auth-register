@@ -351,7 +351,7 @@ class HistorialService {
    *
    * PACIENTE:
    * No utiliza este método (usa la descarga en PDF, que valida
-   * pertenencia mediante `obtenerDatosHistorialParaPDF`).
+  * pertenencia comparando `paciente.id_usuario` con `usuario.id` del JWT).
    *
    * Comportamiento, firma y respuesta sin cambios: solo se movió la
    * consulta en sí a `_buscarHistorialesDePaciente`.
@@ -370,7 +370,10 @@ class HistorialService {
     // VALIDAR ROL
     // -------------------------------------------------------
 
-    if (usuario.rol !== "ADMIN" && usuario.rol !== "ODONTOLOGO") {
+    if (usuario.rol === "PACIENTE") {
+      const paciente = await this._obtenerPacienteOrFail(id_paciente);
+      this._validarAccesoConsultaPaciente(paciente, usuario);
+    } else if (usuario.rol !== "ADMIN" && usuario.rol !== "ODONTOLOGO") {
       throw new AppError(
         "No tienes autorización para consultar historias clínicas.",
         403,
