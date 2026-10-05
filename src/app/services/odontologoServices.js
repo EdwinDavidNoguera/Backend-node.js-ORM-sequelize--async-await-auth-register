@@ -921,8 +921,9 @@ class OdontologoService {
               email:
                 datos.email,
 
-              password:
-                datos.password,
+              ...(datos.password
+                ? { password: datos.password }
+                : {}),
 
               avatar:
                 datos.avatar,

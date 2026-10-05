@@ -279,6 +279,31 @@ class PacienteService {
       const paciente = await Paciente.findByPk(id, { transaction });
       if (!paciente) throw new AppError("Paciente no encontrado", 404);
 
+      if (!datos || typeof datos !== "object" || Array.isArray(datos)) {
+        throw new AppError("Los datos de actualización no son válidos", 400);
+      }
+
+      const camposPermitidos = new Set([
+        "nombre",
+        "apellido",
+        "celular",
+        "cedula",
+        "direccion",
+        "genero",
+        "fecha_nacimiento",
+        "email",
+        "password",
+      ]);
+      const camposDesconocidos = Object.keys(datos).filter(
+        (campo) => !camposPermitidos.has(campo),
+      );
+
+      if (camposDesconocidos.length > 0) {
+        throw new AppError("La solicitud contiene campos no permitidos", 400, {
+          campos: camposDesconocidos,
+        });
+      }
+
       // Validación acumulativa para campos enviados en la actualización
       this.validarFormularioPaciente(datos, { esActualizacion: true });
 
@@ -295,6 +320,21 @@ class PacienteService {
         },
         { transaction },
       );
+
+      if (Object.hasOwn(datos, "password")) {
+        if (!paciente.id_usuario) {
+          throw new AppError(
+            "El paciente no tiene una cuenta de usuario asociada",
+            400,
+          );
+        }
+
+        await UsuarioService.actualizarUsuario(
+          paciente.id_usuario,
+          { password: datos.password },
+          { transaction },
+        );
+      }
 
       await transaction.commit();
       return { paciente };

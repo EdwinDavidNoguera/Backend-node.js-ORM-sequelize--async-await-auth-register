@@ -230,11 +230,32 @@ class UsuarioService {
       throw new AppError("Usuario no encontrado", 404);
     }
 
+    if (!datos || typeof datos !== "object" || Array.isArray(datos)) {
+      throw new AppError("Los datos de actualización no son válidos", 400);
+    }
+
+    const camposPermitidos = new Set(["email", "password", "avatar", "activo", "rol"]);
+    const camposDesconocidos = Object.keys(datos).filter(
+      (campo) => !camposPermitidos.has(campo)
+    );
+
+    if (camposDesconocidos.length > 0) {
+      throw new AppError("La solicitud contiene campos no permitidos", 400, {
+        campos: camposDesconocidos
+      });
+    }
+
+    if (Object.keys(datos).length === 0) {
+      throw new AppError("No se recibieron datos para actualizar", 400);
+    }
+
     const { email, password, avatar, activo, rol } = datos;
     const errores = {};
 
     // Valida el nuevo correo y comprueba que no esté siendo utilizado.
-    if (email && email.trim() !== usuario.email) {
+    if (Object.hasOwn(datos, "email") && typeof email !== "string") {
+      errores.email = "El correo electrónico no es válido";
+    } else if (email && email.trim() !== usuario.email) {
       const emailLimpio = email.trim();
       const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -255,11 +276,11 @@ class UsuarioService {
     // Validar y cifrar la nueva contraseña si fue proporcionada.
     let passwordHash;
 
-    if (password) {
+    if (Object.hasOwn(datos, "password") && password !== "") {
       const regexPassword =
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
 
-      if (!regexPassword.test(password)) {
+      if (typeof password !== "string" || !regexPassword.test(password)) {
         errores.password =
           "La contraseña debe tener mínimo 8 caracteres, incluyendo mayúsculas, minúsculas, números y caracteres especiales.";
       } else {

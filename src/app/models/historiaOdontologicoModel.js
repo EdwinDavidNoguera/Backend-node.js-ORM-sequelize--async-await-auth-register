@@ -76,6 +76,7 @@ HistoriaOdontologica.init(
       type: DataTypes.TEXT,
       allowNull: true,
     },
+
   },
   {
     sequelize,
@@ -85,7 +86,7 @@ HistoriaOdontologica.init(
     /**
      * La tabla tiene createdAt y updatedAt
      */
-    timestamps: false,
+    timestamps: true,
     createdAt: "fecha_registro",
     updatedAt: false // No se actualiza el registro después de creado
   }
